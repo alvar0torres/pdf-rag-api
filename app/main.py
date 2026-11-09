@@ -3,7 +3,12 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from app.document_processing import extract_pdf_data
 from app.embeddings import create_embeddings
 from app.generation import generate_answer
-from app.vector_store import search_chunks, store_chunks, delete_document_chunks
+from app.vector_store import (
+    search_chunks,
+    search_keyword_chunks,
+    store_chunks,
+    delete_document_chunks,
+)
 from app.schemas import (
     AskRequest,
     AskResponse,
@@ -59,6 +64,28 @@ async def index_chunks(request: IndexChunksRequest):
 async def search(request: SearchRequest):
     embeddings = await create_embeddings([request.question])
     results = search_chunks(embeddings[0], limit=request.limit)
+
+    return {
+        "question": request.question,
+        "results": [
+            {
+                "score": result.score,
+                "text": result.payload.get("text") if result.payload else None,
+                "file_name": (
+                    result.payload.get("file_name") if result.payload else None
+                ),
+                "page_number": (
+                    result.payload.get("page_number") if result.payload else None
+                ),
+            }
+            for result in results
+        ],
+    }
+
+
+@app.post("/search/keyword")
+async def keyword_search(request: SearchRequest):
+    results = search_keyword_chunks(request.question, limit=request.limit)
 
     return {
         "question": request.question,

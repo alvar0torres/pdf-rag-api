@@ -57,3 +57,34 @@ def test_search_returns_empty_results_when_nothing_matches(monkeypatch):
     assert response == {"question": question, "results": []}
     embeddings_mock.assert_awaited_once_with([question])
     search_mock.assert_called_once_with([0.3, 0.4], limit=5)
+
+
+def test_keyword_search_returns_results_without_creating_embeddings(monkeypatch):
+    question = "What is the retention period?"
+    payload = {
+        "text": "Logs are kept for 30 days.",
+        "file_name": "retention.pdf",
+        "page_number": 2,
+    }
+    search_mock = Mock(return_value=[Mock(score=0.82, payload=payload)])
+    embeddings_mock = AsyncMock()
+    monkeypatch.setattr(main, "search_keyword_chunks", search_mock)
+    monkeypatch.setattr(main, "create_embeddings", embeddings_mock)
+
+    response = asyncio.run(
+        main.keyword_search(SearchRequest(question=question, limit=3))
+    )
+
+    assert response == {
+        "question": question,
+        "results": [
+            {
+                "score": 0.82,
+                "text": "Logs are kept for 30 days.",
+                "file_name": "retention.pdf",
+                "page_number": 2,
+            }
+        ],
+    }
+    search_mock.assert_called_once_with(question, limit=3)
+    embeddings_mock.assert_not_awaited()
