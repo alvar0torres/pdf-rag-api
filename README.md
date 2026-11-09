@@ -57,6 +57,7 @@ The API is available at `http://127.0.0.1:8000`. Interactive API documentation i
 | `POST` | `/documents/ingest` | Extract a PDF, create embeddings, and replace indexed chunks with the same filename. |
 | `POST` | `/documents/index` | Create embeddings and index supplied chunks. |
 | `POST` | `/search` | Return the top matching chunks for a question. |
+| `POST` | `/search/keyword` | Return the top matching chunks using Qdrant's BM25 text search. |
 | `POST` | `/ask` | Generate an answer using retrieved chunks and return source citations. |
 | `DELETE` | `/documents/delete?filename=example.pdf` | Delete indexed chunks for a filename. |
 
@@ -102,7 +103,7 @@ Tests mock external services, so they don't make OpenAI calls or modify the loca
 
 - PDF documents only; Markdown and other formats are not implemented.
 - Chunking is a simple word-based splitter with overlap, not semantic chunking.
-- Retrieval uses dense vector search; hybrid BM25 search and reranking are not implemented.
+- Dense vector search and BM25 keyword search are available separately; combining their results and reranking are not implemented.
 - The Qdrant database is local and persistent in `qdrant_data/`.
 - The answer response includes an answer and citations; a confidence score and frontend are not implemented.
 - This is a learning project, not a hardened production deployment. Authentication, authorization, deployment configuration, and operational monitoring are outside its current scope.

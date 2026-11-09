@@ -17,6 +17,17 @@ if not client.collection_exists(collection_name=COLLECTION_NAME):
         ),
     )
 
+client.create_payload_index(
+    collection_name=COLLECTION_NAME,
+    field_name="text",
+    field_schema=models.TextIndexParams(
+        type="text",
+        tokenizer=models.TokenizerType.WORD,
+        lowercase=True,
+        scoring=True,
+    ),
+)
+
 
 def store_chunks(
     chunks: list[dict[str, str | int]],
@@ -44,6 +55,21 @@ def search_chunks(
     response = client.query_points(
         collection_name=COLLECTION_NAME,
         query=embedding,
+        limit=limit,
+        with_payload=True,
+    )
+
+    return response.points
+
+
+def search_keyword_chunks(
+    query: str,
+    limit: int = 5,
+) -> list[models.ScoredPoint]:
+    response = client.query_points(
+        collection_name=COLLECTION_NAME,
+        query=models.TextQuery(text=query),
+        using="text",
         limit=limit,
         with_payload=True,
     )

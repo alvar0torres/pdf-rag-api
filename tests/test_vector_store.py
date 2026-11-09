@@ -63,6 +63,27 @@ def test_search_chunks_passes_query_options_and_returns_results(monkeypatch):
     )
 
 
+def test_search_keyword_chunks_uses_text_query_and_requested_limit(monkeypatch):
+    results = [Mock(), Mock()]
+    query_points_mock = Mock(return_value=Mock(points=results))
+    monkeypatch.setattr(
+        vector_store,
+        "client",
+        Mock(query_points=query_points_mock),
+    )
+
+    response = vector_store.search_keyword_chunks("retention period", limit=3)
+
+    assert response is results
+    query_points_mock.assert_called_once_with(
+        collection_name=vector_store.COLLECTION_NAME,
+        query=models.TextQuery(text="retention period"),
+        using="text",
+        limit=3,
+        with_payload=True,
+    )
+
+
 def test_delete_document_chunks_sends_file_name_filter(monkeypatch):
     delete_mock = Mock()
     monkeypatch.setattr(vector_store, "client", Mock(delete=delete_mock))
