@@ -5,7 +5,7 @@ from fastapi import HTTPException, UploadFile
 from pypdf import PdfReader
 from pypdf.errors import PdfReadError
 
-from app.chunking import chunk_text
+from app.chunking import text_splitter
 from app.schemas import ExtractedPage
 
 
@@ -37,7 +37,7 @@ async def extract_pdf_data(
 
     for page_number, page in enumerate(reader.pages, start=1):
         text = page.extract_text() or ""
-        chunks = chunk_text(text)
+        chunks = text_splitter.split_text(text)
 
         pages.append(
             {

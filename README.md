@@ -5,7 +5,7 @@ A learning project that demonstrates a Retrieval-Augmented Generation (RAG) API 
 ## How it works
 
 1. Upload a PDF for extraction or ingestion.
-2. Extract text page by page and split it into overlapping, word-based chunks.
+2. Extract text page by page and split it into overlapping chunks using LangChain's recursive character splitter.
 3. Generate embeddings with OpenAI's `text-embedding-3-small` model and store them in Qdrant.
 4. Search for relevant chunks and pass them to `gpt-4o-mini` to generate an answer.
 5. Map the model's source IDs back to retrieved chunks to return citations.
@@ -102,7 +102,7 @@ Tests mock external services, so they don't make OpenAI calls or modify the loca
 ## Current scope and limitations
 
 - PDF documents only; Markdown and other formats are not implemented.
-- Chunking is a simple word-based splitter with overlap, not semantic chunking.
+- Chunking uses LangChain's `RecursiveCharacterTextSplitter` with a 1,000-character chunk size and 150-character overlap; it is not semantic chunking.
 - Dense vector search and BM25 keyword search are available separately; combining their results and reranking are not implemented.
 - The Qdrant database is local and persistent in `qdrant_data/`.
 - The answer response includes an answer and citations; a confidence score and frontend are not implemented.

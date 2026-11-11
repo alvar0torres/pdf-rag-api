@@ -1,21 +1,25 @@
-from app.chunking import chunk_text
+from app.chunking import text_splitter
 
 
 def test_empty_text_returns_no_chunks():
-    assert chunk_text("") == []
+    assert text_splitter.split_text("") == []
 
 
 def test_short_text_returns_one_chunk():
-    assert chunk_text("These words fit.") == ["These words fit."]
+    assert text_splitter.split_text("These words fit.") == ["These words fit."]
 
 
 def test_text_splits_at_maximum_size():
-    chunks = chunk_text("aa bb cc", max_chars=5, overlap_chars=0)
+    text = " ".join(f"token{index}" for index in range(300))
+    chunks = text_splitter.split_text(text)
 
-    assert chunks == ["aa bb", "cc"]
+    assert len(chunks) > 1
+    assert all(len(chunk) <= 1000 for chunk in chunks)
+    for current, following in zip(chunks, chunks[1:]):
+        max_overlap_to_check = min(150, len(current), len(following))
+        overlap_length = 0
+        for length in range(1, max_overlap_to_check + 1):
+            if current[-length:] == following[:length]:
+                overlap_length = length
 
-
-def test_chunks_repeat_words_for_overlap():
-    chunks = chunk_text("aa bb cc dd", max_chars=5, overlap_chars=2)
-
-    assert chunks == ["aa bb", "bb cc", "cc dd"]
+        assert overlap_length >= 100
