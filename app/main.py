@@ -6,6 +6,7 @@ from app.generation import generate_answer
 from app.vector_store import (
     search_chunks,
     search_keyword_chunks,
+    search_hybrid_chunks,
     store_chunks,
     delete_document_chunks,
 )
@@ -86,6 +87,33 @@ async def search(request: SearchRequest):
 @app.post("/search/keyword")
 async def keyword_search(request: SearchRequest):
     results = search_keyword_chunks(request.question, limit=request.limit)
+
+    return {
+        "question": request.question,
+        "results": [
+            {
+                "score": result.score,
+                "text": result.payload.get("text") if result.payload else None,
+                "file_name": (
+                    result.payload.get("file_name") if result.payload else None
+                ),
+                "page_number": (
+                    result.payload.get("page_number") if result.payload else None
+                ),
+            }
+            for result in results
+        ],
+    }
+
+
+@app.post("/search/hybrid")
+async def hybrid_search(request: SearchRequest):
+    embeddings = await create_embeddings([request.question])
+    results = search_hybrid_chunks(
+        embeddings[0],
+        request.question,
+        limit=request.limit,
+    )
 
     return {
         "question": request.question,

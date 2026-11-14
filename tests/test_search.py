@@ -88,3 +88,34 @@ def test_keyword_search_returns_results_without_creating_embeddings(monkeypatch)
     }
     search_mock.assert_called_once_with(question, limit=3)
     embeddings_mock.assert_not_awaited()
+
+
+def test_hybrid_search_embeds_question_and_returns_fused_results(monkeypatch):
+    question = "What is the retention period?"
+    payload = {
+        "text": "Logs are kept for 30 days.",
+        "file_name": "retention.pdf",
+        "page_number": 2,
+    }
+    embeddings_mock = AsyncMock(return_value=[[0.1, 0.2]])
+    search_mock = Mock(return_value=[Mock(score=0.75, payload=payload)])
+    monkeypatch.setattr(main, "create_embeddings", embeddings_mock)
+    monkeypatch.setattr(main, "search_hybrid_chunks", search_mock)
+
+    response = asyncio.run(
+        main.hybrid_search(SearchRequest(question=question, limit=3))
+    )
+
+    assert response == {
+        "question": question,
+        "results": [
+            {
+                "score": 0.75,
+                "text": "Logs are kept for 30 days.",
+                "file_name": "retention.pdf",
+                "page_number": 2,
+            }
+        ],
+    }
+    embeddings_mock.assert_awaited_once_with([question])
+    search_mock.assert_called_once_with([0.1, 0.2], question, limit=3)

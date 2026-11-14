@@ -84,6 +84,44 @@ def test_search_keyword_chunks_uses_text_query_and_requested_limit(monkeypatch):
     )
 
 
+def test_search_hybrid_chunks_prefetches_dense_and_text_then_fuses_with_rrf(
+    monkeypatch,
+):
+    results = [Mock(), Mock()]
+    query_points_mock = Mock(return_value=Mock(points=results))
+    monkeypatch.setattr(
+        vector_store,
+        "client",
+        Mock(query_points=query_points_mock),
+    )
+    embedding = [0.1, 0.2]
+
+    response = vector_store.search_hybrid_chunks(
+        embedding,
+        "retention period",
+        limit=3,
+    )
+
+    assert response is results
+    query_points_mock.assert_called_once_with(
+        collection_name=vector_store.COLLECTION_NAME,
+        prefetch=[
+            models.Prefetch(
+                query=embedding,
+                limit=vector_store.HYBRID_PREFETCH_LIMIT,
+            ),
+            models.Prefetch(
+                query=models.TextQuery(text="retention period"),
+                using="text",
+                limit=vector_store.HYBRID_PREFETCH_LIMIT,
+            ),
+        ],
+        query=models.RrfQuery(rrf=models.Rrf()),
+        limit=3,
+        with_payload=True,
+    )
+
+
 def test_delete_document_chunks_sends_file_name_filter(monkeypatch):
     delete_mock = Mock()
     monkeypatch.setattr(vector_store, "client", Mock(delete=delete_mock))
