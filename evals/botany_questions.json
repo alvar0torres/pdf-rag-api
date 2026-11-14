@@ -1,0 +1,58 @@
+{
+  "title": "Introduction to Botany retrieval benchmark",
+  "source_file": "intro_botany.pdf",
+  "source_url": "https://herba.msu.ru/shipunov/school/biol_154/textbook/intro_botany.pdf",
+  "license": "CC0, as stated on the author's website and in the PDF",
+  "questions": [
+    {
+      "id": "photosynthesis-stages",
+      "question": "Which two stages make up photosynthesis, and what does each stage produce?",
+      "relevant_pages": [29]
+    },
+    {
+      "id": "c4-photorespiration",
+      "question": "Why can the C4 pathway help plants outperform C3 plants in intense light and high temperatures?",
+      "relevant_pages": [36, 37]
+    },
+    {
+      "id": "cam-timing",
+      "question": "When do CAM plants run the C4 pathway, and how does that separate it from photosynthesis?",
+      "relevant_pages": [37]
+    },
+    {
+      "id": "plant-life-cycle",
+      "question": "Which life cycle do plants retain, and how does it differ from the animal life cycle?",
+      "relevant_pages": [62]
+    },
+    {
+      "id": "guard-cell-mechanism",
+      "question": "How do potassium ions and osmosis cause a stoma to open and close?",
+      "relevant_pages": [90]
+    },
+    {
+      "id": "mycorrhiza-exchange",
+      "question": "What does mycorrhiza help the plant absorb, and what does the plant exchange with the fungus?",
+      "relevant_pages": [98]
+    },
+    {
+      "id": "root-absorption-zone",
+      "question": "Which root zone absorbs water and nutrients, and what develops there?",
+      "relevant_pages": [98]
+    },
+    {
+      "id": "seed-structure",
+      "question": "How do onion seeds and bean seeds differ in endosperm and cotyledon structure?",
+      "relevant_pages": [140]
+    },
+    {
+      "id": "double-fertilization",
+      "question": "What two products are formed when the two sperm cells take part in double fertilization?",
+      "relevant_pages": [152]
+    },
+    {
+      "id": "pollination-types",
+      "question": "What are the two types of pollination, and which agents can carry out cross-pollination?",
+      "relevant_pages": [164]
+    }
+  ]
+}
