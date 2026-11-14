@@ -43,6 +43,13 @@ class AskResponse(BaseModel):
     citations: list[Citation]
 
 
+class SourceChunk(TypedDict):
+    text: str
+    file_name: str
+    page_number: int
+    chunk_index: int
+
+
 class ExtractedChunk(TypedDict):
     chunk_index: int
     text: str

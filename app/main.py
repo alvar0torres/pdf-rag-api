@@ -3,6 +3,7 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from app.document_processing import extract_pdf_data
 from app.embeddings import create_embeddings
 from app.generation import generate_answer
+from app.reranker import RerankerProviderError, rerank_sources
 from app.vector_store import (
     search_chunks,
     search_keyword_chunks,
@@ -20,6 +21,7 @@ from app.schemas import (
 )
 
 app = FastAPI(title="Production-Grade RAG API")
+RERANK_CANDIDATE_LIMIT = 20
 
 
 @app.get("/health")
@@ -136,7 +138,11 @@ async def hybrid_search(request: SearchRequest):
 @app.post("/ask", response_model=AskResponse)
 async def ask(request: AskRequest):
     question_embedding = (await create_embeddings([request.question]))[0]
-    results = search_chunks(question_embedding, limit=request.limit)
+    results = search_hybrid_chunks(
+        question_embedding,
+        request.question,
+        limit=RERANK_CANDIDATE_LIMIT,
+    )
 
     sources = [result.payload for result in results if result.payload is not None]
 
@@ -145,6 +151,14 @@ async def ask(request: AskRequest):
             answer="I could not find an answer in the provided sources.",
             citations=[],
         )
+
+    try:
+        sources = await rerank_sources(request.question, sources, request.limit)
+    except RerankerProviderError as error:
+        raise HTTPException(
+            status_code=502,
+            detail="The reranking service request failed.",
+        ) from error
 
     generated = await generate_answer(request.question, sources)
 

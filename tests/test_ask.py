@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock, Mock
 from fastapi.testclient import TestClient
 
 from app import main
+from app.reranker import RerankerProviderError
 from app.schemas import GeneratedAnswer
 
 client = TestClient(main.app)
@@ -29,12 +30,15 @@ def test_ask_returns_answer_with_citation(monkeypatch):
     search_mock = Mock(return_value=search_results)
     generated_answer = GeneratedAnswer(
         answer="The capital of France is Paris.",
-        source_ids=["S1"],
+        source_ids=["S2"],
     )
     generation_mock = AsyncMock(return_value=generated_answer)
 
     monkeypatch.setattr(main, "create_embeddings", embeddings_mock)
-    monkeypatch.setattr(main, "search_chunks", search_mock)
+    monkeypatch.setattr(main, "search_hybrid_chunks", search_mock)
+    reranked_sources = [sources[1], sources[0]]
+    rerank_mock = AsyncMock(return_value=reranked_sources)
+    monkeypatch.setattr(main, "rerank_sources", rerank_mock)
     monkeypatch.setattr(main, "generate_answer", generation_mock)
 
     response = client.post(
@@ -55,8 +59,20 @@ def test_ask_returns_answer_with_citation(monkeypatch):
     }
 
     embeddings_mock.assert_awaited_once_with(["What is the capital of France?"])
-    search_mock.assert_called_once_with([0.1, 0.2], limit=5)
-    generation_mock.assert_awaited_once_with("What is the capital of France?", sources)
+    search_mock.assert_called_once_with(
+        [0.1, 0.2],
+        "What is the capital of France?",
+        limit=main.RERANK_CANDIDATE_LIMIT,
+    )
+    rerank_mock.assert_awaited_once_with(
+        "What is the capital of France?",
+        sources,
+        5,
+    )
+    generation_mock.assert_awaited_once_with(
+        "What is the capital of France?",
+        reranked_sources,
+    )
 
 
 def test_ask_rejects_unknown_source_id(monkeypatch):
@@ -74,9 +90,10 @@ def test_ask_rejects_unknown_source_id(monkeypatch):
     )
     monkeypatch.setattr(
         main,
-        "search_chunks",
+        "search_hybrid_chunks",
         Mock(return_value=[Mock(payload=source)]),
     )
+    monkeypatch.setattr(main, "rerank_sources", AsyncMock(return_value=[source]))
     monkeypatch.setattr(
         main,
         "generate_answer",
@@ -114,9 +131,11 @@ def test_ask_handles_no_sources(monkeypatch):
     )
     monkeypatch.setattr(
         main,
-        "search_chunks",
+        "search_hybrid_chunks",
         Mock(return_value=[]),  # No sources found.
     )
+    rerank_mock = AsyncMock()
+    monkeypatch.setattr(main, "rerank_sources", rerank_mock)
     monkeypatch.setattr(
         main,
         "generate_answer",
@@ -129,8 +148,46 @@ def test_ask_handles_no_sources(monkeypatch):
     )
 
     generation_mock.assert_not_awaited()
+    rerank_mock.assert_not_awaited()
     assert response.status_code == 200
     assert response.json() == {
         "answer": "I could not find an answer in the provided sources.",
         "citations": [],
     }
+
+
+def test_ask_returns_bad_gateway_when_reranker_provider_fails(monkeypatch):
+    source = {
+        "text": "The capital of France is Paris.",
+        "file_name": "geography.pdf",
+        "page_number": 1,
+        "chunk_index": 1,
+    }
+    monkeypatch.setattr(
+        main,
+        "create_embeddings",
+        AsyncMock(return_value=[[0.1, 0.2]]),
+    )
+    monkeypatch.setattr(
+        main,
+        "search_hybrid_chunks",
+        Mock(return_value=[Mock(payload=source)]),
+    )
+    monkeypatch.setattr(
+        main,
+        "rerank_sources",
+        AsyncMock(side_effect=RerankerProviderError("provider unavailable")),
+    )
+    generation_mock = AsyncMock()
+    monkeypatch.setattr(main, "generate_answer", generation_mock)
+
+    response = client.post(
+        "/ask",
+        json={"question": "What is the capital of France?", "limit": 5},
+    )
+
+    assert response.status_code == 502
+    assert response.json() == {
+        "detail": "The reranking service request failed."
+    }
+    generation_mock.assert_not_awaited()

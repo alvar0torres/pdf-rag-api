@@ -7,15 +7,16 @@ A learning project that demonstrates a Retrieval-Augmented Generation (RAG) API 
 1. Upload a PDF for extraction or ingestion.
 2. Extract text page by page and split it into overlapping chunks using LangChain's recursive character splitter.
 3. Generate embeddings with OpenAI's `text-embedding-3-small` model and store them in Qdrant.
-4. Search for relevant chunks and pass them to `gpt-4o-mini` to generate an answer.
-5. Map the model's source IDs back to retrieved chunks to return citations.
+4. Combine dense and BM25 retrieval with Qdrant's RRF, then rerank the candidates with Cohere.
+5. Pass the top-ranked chunks to `gpt-4o-mini` and map its source IDs back to document citations.
 
 ## Requirements
 
 - Python 3.10 or newer
 - An OpenAI API key with access to the embedding and chat models used by the app
+- A Cohere API key for reranking
 
-OpenAI API calls may incur charges.
+OpenAI and Cohere API calls may incur charges.
 
 ## Setup
 
@@ -38,7 +39,7 @@ python -m pip install -r requirements.txt
 cp .env.template .env
 ```
 
-Replace the placeholder value for `OPENAI_API_KEY` in `.env` with your key. Do not commit `.env`.
+Replace the placeholder values for `OPENAI_API_KEY` and `COHERE_API_KEY` in `.env` with your keys. Do not commit `.env`.
 
 ## Run the API
 
@@ -104,7 +105,7 @@ Tests mock external services, so they don't make OpenAI calls or modify the loca
 
 - PDF documents only; Markdown and other formats are not implemented.
 - Chunking uses LangChain's `RecursiveCharacterTextSplitter` with a 1,000-character chunk size and 150-character overlap; it is not semantic chunking.
-- Dense, BM25 keyword, and hybrid RRF search are available; reranking is not implemented.
+- `/ask` retrieves hybrid candidates, reranks them with Cohere, then generates an answer with citations.
 - The Qdrant database is local and persistent in `qdrant_data/`.
 - The answer response includes an answer and citations; a confidence score and frontend are not implemented.
 - This is a learning project, not a hardened production deployment. Authentication, authorization, deployment configuration, and operational monitoring are outside its current scope.
