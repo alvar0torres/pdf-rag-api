@@ -103,7 +103,9 @@ Tests mock external services, so they don't make OpenAI calls or modify the loca
 
 ## Retrieval evaluation
 
-The starter benchmark in `evals/botany_questions.json` compares dense search, hybrid search, and hybrid search followed by Cohere reranking. It uses manually labeled PDF pages as relevant evidence and reports Hit@1, Hit@3, Hit@5, and MRR@5. This evaluates retrieval, not answer generation.
+The benchmark in `evals/botany_questions.json` compares dense search, hybrid search, and hybrid search followed by Cohere reranking. Each question has one or more manually labeled evidence passages and their PDF page numbers. A retrieved chunk counts as relevant only if it comes from the expected file and page and contains a labeled passage after normalizing case, whitespace, and Unicode compatibility differences such as ligatures. It reports Hit@1, Hit@3, Hit@5, and MRR@5. These scores are not directly comparable with the earlier page-only scores.
+
+Before making provider calls, the script checks that every labeled passage exists in an indexed chunk. If a check fails, verify the PDF version and chunking, then re-ingest the PDF or update the label. Multiple passages are alternatives: finding any one counts as a hit. Matching is exact after normalization, not semantic, so valid unlabeled evidence or passages split across chunks can still count as misses. Ensure each label supports its question.
 
 Ingest `data/sample_documents/intro_botany.pdf` as `intro_botany.pdf`, then stop the API server before running the benchmark. The local Qdrant database can only be opened by one process at a time.
 
@@ -111,14 +113,14 @@ Ingest `data/sample_documents/intro_botany.pdf` as `intro_botany.pdf`, then stop
 python -m evals.evaluate_retrieval
 ```
 
-The benchmark makes one batched OpenAI embeddings request and one Cohere reranking request per question, so provider usage may incur charges. It requires `OPENAI_API_KEY` and `COHERE_API_KEY` in `.env`.
+The benchmark makes one batched OpenAI embeddings request and one Cohere reranking request per question, so provider usage may incur charges. It requires `OPENAI_API_KEY` and `COHERE_API_KEY` in `.env`. Cohere rate limits may stop the run; if that happens, wait for the limit to reset before trying again.
 
 ## Current scope and limitations
 
 - PDF documents only; Markdown and other formats are not implemented.
 - Chunking uses LangChain's `RecursiveCharacterTextSplitter` with a 1,000-character chunk size and 150-character overlap; it is not semantic chunking.
 - `/ask` retrieves hybrid candidates, reranks them with Cohere, then generates an answer with citations.
-- The retrieval benchmark uses page-level relevance labels; it does not yet evaluate answer quality or citation correctness.
+- The retrieval benchmark evaluates retrieval only; answer quality and citation correctness are not yet evaluated.
 - The Qdrant database is local and persistent in `qdrant_data/`.
 - The answer response includes an answer and citations; a confidence score and frontend are not implemented.
 - This is a learning project, not a hardened production deployment. Authentication, authorization, deployment configuration, and operational monitoring are outside its current scope.

@@ -4,11 +4,13 @@ import argparse
 import asyncio
 import json
 import os
+import unicodedata
 from pathlib import Path
 from typing import Sequence
 
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
+from qdrant_client import QdrantClient, models
 
 from app.schemas import SourceChunk
 
@@ -19,19 +21,22 @@ MODES = ("dense", "hybrid", "hybrid + Cohere")
 DEFAULT_DATASET = Path(__file__).with_name("botany_questions.json")
 
 
+class EvidencePassage(BaseModel):
+    page_number: int = Field(ge=1)
+    text: str = Field(min_length=1)
+
+    @field_validator("text")
+    @classmethod
+    def text_must_not_be_blank(cls, text: str) -> str:
+        if not text.strip():
+            raise ValueError("Evidence text must not be blank.")
+        return text
+
+
 class EvaluationQuestion(BaseModel):
     id: str = Field(min_length=1)
     question: str = Field(min_length=1)
-    relevant_pages: list[int] = Field(min_length=1)
-
-    @field_validator("relevant_pages")
-    @classmethod
-    def pages_must_be_positive_and_unique(cls, pages: list[int]) -> list[int]:
-        if any(page < 1 for page in pages):
-            raise ValueError("Relevant page numbers must be positive.")
-        if len(set(pages)) != len(pages):
-            raise ValueError("Relevant page numbers must be unique.")
-        return pages
+    evidence: list[EvidencePassage] = Field(min_length=1)
 
 
 class EvaluationDataset(BaseModel):
@@ -54,19 +59,29 @@ def load_dataset(path: Path) -> EvaluationDataset:
         raw_data = json.loads(path.read_text(encoding="utf-8"))
         return EvaluationDataset.model_validate(raw_data)
     except (OSError, json.JSONDecodeError, ValidationError) as error:
-        raise ValueError(f"Unable to load evaluation dataset {path}: {error}") from error
+        raise ValueError(
+            f"Unable to load evaluation dataset {path}: {error}"
+        ) from error
+
+
+def normalize_text(text: str) -> str:
+    return " ".join(unicodedata.normalize("NFKC", text).casefold().split())
 
 
 def first_relevant_rank(
     results: Sequence[SourceChunk],
     *,
     source_file: str,
-    relevant_pages: set[int],
+    evidence: Sequence[EvidencePassage],
 ) -> int | None:
     for rank, result in enumerate(results, start=1):
-        if (
-            result["file_name"] == source_file
-            and result["page_number"] in relevant_pages
+        if result["file_name"] != source_file:
+            continue
+        text = normalize_text(result["text"])
+        if any(
+            result["page_number"] == passage.page_number
+            and normalize_text(passage.text) in text
+            for passage in evidence
         ):
             return rank
     return None
@@ -77,15 +92,13 @@ def calculate_metrics(ranks: Sequence[int | None]) -> dict[str, float]:
         raise ValueError("At least one rank is required to calculate metrics.")
 
     metrics = {
-        f"hit@{cutoff}": sum(
-            rank is not None and rank <= cutoff for rank in ranks
-        )
+        f"hit@{cutoff}": sum(rank is not None and rank <= cutoff for rank in ranks)
         / len(ranks)
         for cutoff in HIT_CUTOFFS
     }
-    metrics["mrr@5"] = sum(
-        1 / rank if rank is not None else 0 for rank in ranks
-    ) / len(ranks)
+    metrics["mrr@5"] = sum(1 / rank if rank is not None else 0 for rank in ranks) / len(
+        ranks
+    )
     return metrics
 
 
@@ -119,11 +132,64 @@ def _sources_from_points(points: Sequence[object], mode: str) -> list[SourceChun
     return sources
 
 
+def validate_indexed_evidence(
+    qdrant_client: QdrantClient,
+    collection_name: str,
+    dataset: EvaluationDataset,
+) -> None:
+    pages = sorted(
+        {
+            passage.page_number
+            for question in dataset.questions
+            for passage in question.evidence
+        }
+    )
+    page_filter = models.Filter(
+        must=[
+            models.FieldCondition(
+                key="file_name",
+                match=models.MatchValue(value=dataset.source_file),
+            ),
+            models.FieldCondition(
+                key="page_number",
+                match=models.MatchAny(any=pages),
+            ),
+        ]
+    )
+    sources: list[SourceChunk] = []
+    offset = None
+    while True:
+        points, offset = qdrant_client.scroll(
+            collection_name=collection_name,
+            scroll_filter=page_filter,
+            limit=100,
+            offset=offset,
+            with_payload=True,
+            with_vectors=False,
+        )
+        sources.extend(_sources_from_points(points, "Indexed evidence"))
+        if offset is None:
+            break
+
+    for question in dataset.questions:
+        for passage in question.evidence:
+            if (
+                first_relevant_rank(
+                    sources, source_file=dataset.source_file, evidence=[passage]
+                )
+                is None
+            ):
+                raise ValueError(
+                    f"Evidence for question {question.id!r} on PDF page "
+                    f"{passage.page_number} was not found in an indexed chunk. "
+                    "Check the document version, labels, and chunking, then re-ingest "
+                    "the PDF if needed."
+                )
+
+
 async def run_evaluation(
     dataset: EvaluationDataset,
 ) -> dict[str, list[int | None]]:
-    from qdrant_client import models
-
     from app.embeddings import create_embeddings
     from app.reranker import rerank_sources
     from app.vector_store import (
@@ -157,6 +223,8 @@ async def run_evaluation(
             "Ingest the benchmark PDF using that filename first."
         )
 
+    validate_indexed_evidence(qdrant_client, COLLECTION_NAME, dataset)
+
     embeddings = await create_embeddings(
         [question.question for question in dataset.questions]
     )
@@ -183,7 +251,6 @@ async def run_evaluation(
             limit=TOP_K,
         )
 
-        relevant_pages = set(question.relevant_pages)
         for mode, sources in (
             ("dense", dense_sources[:TOP_K]),
             ("hybrid", hybrid_sources[:TOP_K]),
@@ -193,7 +260,7 @@ async def run_evaluation(
                 first_relevant_rank(
                     sources,
                     source_file=dataset.source_file,
-                    relevant_pages=relevant_pages,
+                    evidence=question.evidence,
                 )
             )
 

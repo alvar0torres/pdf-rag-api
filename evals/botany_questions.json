@@ -7,52 +7,102 @@
     {
       "id": "photosynthesis-stages",
       "question": "Which two stages make up photosynthesis, and what does each stage produce?",
-      "relevant_pages": [29]
+      "evidence": [
+        {
+          "page_number": 29,
+          "text": "Light reactions depend on the amount of light and water; they produce oxygen and energy in the form of ATP . Enzymatic reactions depend on carbon diox- ide and water; they take energy from the light reactions and produce carbohydrates."
+        }
+      ]
     },
     {
       "id": "c4-photorespiration",
       "question": "Why can the C4 pathway help plants outperform C3 plants in intense light and high temperatures?",
-      "relevant_pages": [36, 37]
-    },
-    {
-      "id": "cam-timing",
-      "question": "When do CAM plants run the C4 pathway, and how does that separate it from photosynthesis?",
-      "relevant_pages": [37]
-    },
-    {
-      "id": "plant-life-cycle",
-      "question": "Which life cycle do plants retain, and how does it differ from the animal life cycle?",
-      "relevant_pages": [62]
+      "evidence": [
+        {
+          "page_number": 36,
+          "text": "Consequently, to minimize the amount of photorespiration and save their C 5 and ATP , plants employLe Chatelier’s principle(“Equilibrium Law”) and increase concentration of carbon dioxide."
+        }
+      ]
     },
     {
       "id": "guard-cell-mechanism",
       "question": "How do potassium ions and osmosis cause a stoma to open and close?",
-      "relevant_pages": [90]
-    },
-    {
-      "id": "mycorrhiza-exchange",
-      "question": "What does mycorrhiza help the plant absorb, and what does the plant exchange with the fungus?",
-      "relevant_pages": [98]
-    },
-    {
-      "id": "root-absorption-zone",
-      "question": "Which root zone absorbs water and nutrients, and what develops there?",
-      "relevant_pages": [98]
+      "evidence": [
+        {
+          "page_number": 90,
+          "text": "The opening of the stoma starts from K + accumulation, then osmosis inflates guard cells, and finally the uneven cell wall facilitates the opening of stoma. The stoma closes when the potassium ions exit the cell and water amount decreases in its vacuoles"
+        }
+      ]
     },
     {
       "id": "seed-structure",
       "question": "How do onion seeds and bean seeds differ in endosperm and cotyledon structure?",
-      "relevant_pages": [140]
+      "evidence": [
+        {
+          "page_number": 140,
+          "text": "Seeds are diverse. For example, in an onion (Allium), a seed (Fig. 7.18) has endosperm, one cotyledon (embryonic leaf), radicle (embryonic root), and the lateral embryonic bud (plumula). endosperm cotyledon plumula radicle seed coat Figure 7.18. Monocot seed. Beans (Phaseolus) and other Leguminosae are examples of seeds without endosperm— actually, it was there, but growing embryo usually eats it out completely. These seeds have two large cotyledons."
+        }
+      ]
     },
     {
       "id": "double-fertilization",
       "question": "What two products are formed when the two sperm cells take part in double fertilization?",
-      "relevant_pages": [152]
+      "evidence": [
+        {
+          "page_number": 152,
+          "text": "The first sperm fertilizes the egg and produces the zygote whereas the second sperm fertilizes the central cell and produces the mother cell of the endosperm2"
+        }
+      ]
     },
     {
       "id": "pollination-types",
       "question": "What are the two types of pollination, and which agents can carry out cross-pollination?",
-      "relevant_pages": [164]
+      "evidence": [
+        {
+          "page_number": 164,
+          "text": "Pollination could be of two types: self- and cross-pollination. Cross-pollination can happen in both abiotic and biotic ways. Abiotic would be represented by gravity, wind, or water; biotic would be performed by agents like insects, birds, bats, or in some cases tree mammals like possums."
+        }
+      ]
+    },
+    {
+      "id": "mitochondria-origin",
+      "question": "According to symbiogenesis, how did mitochondria originate?",
+      "evidence": [
+        {
+          "page_number": 43,
+          "text": "Some prey which were not digested, and turned out to be use- ful in providing ATP . Of course, predator cells should also invent a proper transport through the resulted double membrane! Due to natural selection, those prey, which were purple bacteria, became the cell’s mitochondria. This issymbiogenesis, or the formation of two separate organisms into a single organism"
+        }
+      ]
+    },
+    {
+      "id": "apical-meristems",
+      "question": "Where are apical meristems located, and what do they produce?",
+      "evidence": [
+        {
+          "page_number": 72,
+          "text": "Apical meris- tems are centers of plant development located on the very ends of roots (RAM) and stems (SAM). They produce intermediate meristems (likeprocambium) which form all primary tissues."
+        }
+      ]
+    },
+    {
+      "id": "casparian-strips",
+      "question": "How do Casparian strips affect the path of water through a root?",
+      "evidence": [
+        {
+          "page_number": 101,
+          "text": "En- dodermis cell walls bear Casparian strips (rich of hydrophobic suberin and lignin) which prevent the water from passing through the cell wall and force symplastic transport"
+        }
+      ]
+    },
+    {
+      "id": "moss-fern-life-cycles",
+      "question": "How does the dominant life-cycle stage differ between mosses and ferns?",
+      "evidence": [
+        {
+          "page_number": 104,
+          "text": "Bryophyta has gametophyte predominance while Pteridophyta and Spermatophyta both have sporophyte predominance"
+        }
+      ]
     }
   ]
 }
