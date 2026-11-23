@@ -49,6 +49,18 @@ uvicorn app.main:app --reload
 
 The API is available at `http://127.0.0.1:8000`. Interactive API documentation is at `http://127.0.0.1:8000/docs`.
 
+## Run the frontend
+
+With the API running, start the React development server in another terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open the URL printed by Vite (normally `http://localhost:5173`). The development server proxies API requests to `http://127.0.0.1:8000`. Drop or select one PDF to preview its extracted chunks, then select **Index document** to create embeddings and store them. Previewing does not index the document; indexing can incur OpenAI charges and replaces indexed chunks with the same filename. Refreshing the page clears the preview, not the index.
+
 ## Main endpoints
 
 | Method | Path | Purpose |
@@ -101,6 +113,15 @@ python -m pytest
 
 Tests mock external services, so they don't make OpenAI calls or modify the local Qdrant database.
 
+Run the frontend component tests with:
+
+```bash
+cd frontend
+npm test
+```
+
+The frontend tests mock document API calls and do not require a running backend.
+
 ## Retrieval evaluation
 
 The benchmark in `evals/botany_questions.json` compares dense search, hybrid search, and hybrid search followed by Cohere reranking. Each question has one or more manually labeled evidence passages and their PDF page numbers. A retrieved chunk counts as relevant only if it comes from the expected file and page and contains a labeled passage after normalizing case, whitespace, and Unicode compatibility differences such as ligatures. It reports Hit@1, Hit@3, Hit@5, and MRR@5. These scores are not directly comparable with the earlier page-only scores.
@@ -122,5 +143,6 @@ The benchmark makes one batched OpenAI embeddings request and one Cohere reranki
 - `/ask` retrieves hybrid candidates, reranks them with Cohere, then generates an answer with citations.
 - The retrieval benchmark evaluates retrieval only; answer quality and citation correctness are not yet evaluated.
 - The Qdrant database is local and persistent in `qdrant_data/`.
-- The answer response includes an answer and citations; a confidence score and frontend are not implemented.
+- The frontend currently supports document preview and indexing only; the ask and evaluation interfaces are not yet implemented.
+- The answer response includes an answer and citations; a confidence score is not implemented.
 - This is a learning project, not a hardened production deployment. Authentication, authorization, deployment configuration, and operational monitoring are outside its current scope.
