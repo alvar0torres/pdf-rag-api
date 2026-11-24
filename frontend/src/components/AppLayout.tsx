@@ -1,9 +1,15 @@
-import type { ReactNode } from 'react'
+import { useEffect } from 'react'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import styles from './AppLayout.module.css'
 
-type Props = { children: ReactNode }
+function AppLayout() {
+  const { pathname } = useLocation()
+  const pageTitle = pathname === '/ask' ? 'Ask' : 'Documents'
 
-function AppLayout({ children }: Props) {
+  useEffect(() => {
+    document.title = `${pageTitle} | RAG Lab`
+  }, [pageTitle])
+
   return (
     <div className={styles['app-shell']}>
       <aside className={styles.sidebar}>
@@ -13,9 +19,12 @@ function AppLayout({ children }: Props) {
         </div>
         <div className={styles['sidebar-label']}>WORKSPACE</div>
         <nav aria-label="Workspace">
-          <div className={styles['nav-active']}>
+          <NavLink to="/documents" className={({ isActive }) => `${styles.navLink} ${isActive ? styles['nav-active'] : ''}`}>
             <span aria-hidden="true">▤</span> Documents <span className={styles['nav-indicator']} />
-          </div>
+          </NavLink>
+          <NavLink to="/ask" className={({ isActive }) => `${styles.navLink} ${isActive ? styles['nav-active'] : ''}`}>
+            <span aria-hidden="true">✳</span> Ask <span className={styles['nav-indicator']} />
+          </NavLink>
         </nav>
         <div className={styles['sidebar-footer']}>
           <span className={styles['footer-dot']} /> Your RAG workspace <small>Built for exploration</small>
@@ -23,10 +32,10 @@ function AppLayout({ children }: Props) {
       </aside>
       <main className={styles.main}>
         <header className={styles.topbar}>
-          <span>Workspace <span className={styles.slash}>/</span> <strong>Documents</strong></span>
+          <span>Workspace <span className={styles.slash}>/</span> <strong>{pageTitle}</strong></span>
           <span className={styles['topbar-tag']}><span /> LOCAL WORKSPACE</span>
         </header>
-        {children}
+        <Outlet />
       </main>
     </div>
   )

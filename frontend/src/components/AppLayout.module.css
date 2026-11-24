@@ -46,15 +46,20 @@
     margin: 58px 8px 15px;
 }
 
-.nav-active {
+.navLink {
     display: flex;
     align-items: center;
     gap: 11px;
-    background: #eef5f0;
     border-radius: 8px;
-    color: #285d4f;
+    color: #71847c;
     padding: 12px;
     font-size: 13px;
+    text-decoration: none;
+}
+
+.nav-active {
+    background: #eef5f0;
+    color: #285d4f;
     font-weight: 700;
 }
 
@@ -143,10 +148,29 @@
         padding: 16px 20px;
         border-right: 0;
         border-bottom: 1px solid #e8ede9;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
     }
 
-    .sidebar-label,
-    .sidebar nav,
+    .sidebar-label {
+        display: none;
+    }
+
+    .sidebar nav {
+        display: flex;
+        gap: 5px;
+    }
+
+    .navLink {
+        padding: 9px;
+    }
+
+    .navLink > span:first-child {
+        display: none;
+    }
+
+    .nav-indicator,
     .sidebar-footer {
         display: none;
     }

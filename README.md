@@ -59,7 +59,7 @@ npm install
 npm run dev
 ```
 
-Open the URL printed by Vite (normally `http://localhost:5173`). The development server proxies API requests to `http://127.0.0.1:8000`. Drop or select one PDF to preview its extracted chunks, then select **Index document** to create embeddings and store them. Previewing does not index the document; indexing can incur OpenAI charges and replaces indexed chunks with the same filename. Refreshing the page clears the preview, not the index.
+Open the URL printed by Vite (normally `http://localhost:5173`). The development server proxies API requests to `http://127.0.0.1:8000`. In **Documents**, drop or select one PDF to preview its extracted chunks, then select **Index document** to create embeddings and store them. Previewing does not index the document; indexing can incur OpenAI charges and replaces indexed chunks with the same filename. In **Ask**, submit a question to get a grounded answer and inspect its cited source pages. Ask calls use the configured embedding, reranking, and answer providers and may incur charges. Refreshing the page clears the preview, not the index.
 
 ## Main endpoints
 
