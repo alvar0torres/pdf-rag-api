@@ -4,12 +4,21 @@ from fastapi.testclient import TestClient
 
 from app import main
 from app.reranker import RerankerProviderError
-from app.schemas import GeneratedAnswer
+from app.schemas import ChatMessage, GeneratedAnswer
 
 client = TestClient(main.app)
 
 
 def test_ask_returns_answer_with_citation(monkeypatch):
+    history = [
+        {"role": "user", "content": "Tell me about French cities."},
+        {"role": "assistant", "content": "We discussed Paris and Lyon."},
+    ]
+    retrieval_query = (
+        "user: Tell me about French cities.\n"
+        "assistant: We discussed Paris and Lyon.\n"
+        "user: What is the capital of France?"
+    )
     sources = [
         {
             "text": "The capital of France is Paris.",
@@ -43,7 +52,11 @@ def test_ask_returns_answer_with_citation(monkeypatch):
 
     response = client.post(
         "/ask",
-        json={"question": "What is the capital of France?", "limit": 5},
+        json={
+            "question": "What is the capital of France?",
+            "limit": 5,
+            "history": history,
+        },
     )
 
     assert response.status_code == 200
@@ -58,20 +71,26 @@ def test_ask_returns_answer_with_citation(monkeypatch):
         ],
     }
 
-    embeddings_mock.assert_awaited_once_with(["What is the capital of France?"])
+    embeddings_mock.assert_awaited_once_with([retrieval_query])
     search_mock.assert_called_once_with(
         [0.1, 0.2],
-        "What is the capital of France?",
+        retrieval_query,
         limit=main.RERANK_CANDIDATE_LIMIT,
     )
     rerank_mock.assert_awaited_once_with(
-        "What is the capital of France?",
+        retrieval_query,
         sources,
         5,
     )
     generation_mock.assert_awaited_once_with(
         "What is the capital of France?",
         reranked_sources,
+        [
+            ChatMessage(role="user", content="Tell me about French cities."),
+            ChatMessage(
+                role="assistant", content="We discussed Paris and Lyon."
+            ),
+        ],
     )
 
 
@@ -191,3 +210,15 @@ def test_ask_returns_bad_gateway_when_reranker_provider_fails(monkeypatch):
         "detail": "The reranking service request failed."
     }
     generation_mock.assert_not_awaited()
+
+
+def test_ask_rejects_more_than_twelve_history_messages():
+    response = client.post(
+        "/ask",
+        json={
+            "question": "Follow up",
+            "history": [{"role": "user", "content": "Earlier question"}] * 13,
+        },
+    )
+
+    assert response.status_code == 422

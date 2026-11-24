@@ -137,10 +137,16 @@ async def hybrid_search(request: SearchRequest):
 
 @app.post("/ask", response_model=AskResponse)
 async def ask(request: AskRequest):
-    question_embedding = (await create_embeddings([request.question]))[0]
+    recent_history = request.history[-6:]
+    retrieval_context = [
+        f"{message.role}: {message.content}" for message in recent_history
+    ]
+    retrieval_context.append(f"user: {request.question}")
+    retrieval_query = "\n".join(retrieval_context)
+    question_embedding = (await create_embeddings([retrieval_query]))[0]
     results = search_hybrid_chunks(
         question_embedding,
-        request.question,
+        retrieval_query,
         limit=RERANK_CANDIDATE_LIMIT,
     )
 
@@ -153,14 +159,14 @@ async def ask(request: AskRequest):
         )
 
     try:
-        sources = await rerank_sources(request.question, sources, request.limit)
+        sources = await rerank_sources(retrieval_query, sources, request.limit)
     except RerankerProviderError as error:
         raise HTTPException(
             status_code=502,
             detail="The reranking service request failed.",
         ) from error
 
-    generated = await generate_answer(request.question, sources)
+    generated = await generate_answer(request.question, sources, recent_history)
 
     # Map the model's source IDs back to retrieved chunks.
     sources_by_id = {

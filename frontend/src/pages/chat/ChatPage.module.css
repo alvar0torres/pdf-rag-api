@@ -1,0 +1,459 @@
+.content {
+    max-width: 1035px;
+    margin: 0 auto;
+    padding: 45px 48px 30px;
+}
+
+.eyebrow {
+    color: #648d79;
+    font-size: 10px;
+    letter-spacing: 1.7px;
+    font-weight: 700;
+}
+
+.eyebrow span {
+    display: inline-block;
+    width: 18px;
+    height: 1px;
+    vertical-align: middle;
+    background: #79a58c;
+    margin-right: 8px;
+}
+
+.heading-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 13px 0 28px;
+}
+
+.heading-row h1 {
+    font: 600 36px 'Space Grotesk', sans-serif;
+    letter-spacing: -1.5px;
+    margin: 0;
+}
+
+.heading-row p {
+    margin: 8px 0 0;
+    color: #829087;
+    font-size: 13px;
+}
+
+.heading-icon {
+    color: #b7cfc0;
+    font-size: 32px;
+}
+
+.chat-panel {
+    height: min(690px, calc(100vh - 230px));
+    min-height: 430px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e5ece6;
+    border-radius: 12px;
+    background: white;
+    overflow: hidden;
+}
+
+.chat-header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    border-bottom: 1px solid #edf1ed;
+    color: #7d8f84;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.online-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #79b294;
+    margin-right: 7px;
+}
+
+.chat-header button {
+    border: 0;
+    background: transparent;
+    color: #789081;
+    font: 600 11px 'DM Sans', sans-serif;
+    cursor: pointer;
+}
+
+.chat-header button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.chat-header button span {
+    margin-left: 5px;
+    font-size: 14px;
+}
+
+.message-list {
+    flex: 1;
+    overflow: auto;
+    padding: 26px clamp(17px, 5vw, 55px);
+    scroll-behavior: smooth;
+}
+
+.empty-state {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.empty-state>span {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    background: #edf5ef;
+    color: #659078;
+    font-size: 25px;
+}
+
+.empty-state h2 {
+    margin: 16px 0 7px;
+    color: #41544a;
+    font: 600 17px 'Space Grotesk', sans-serif;
+}
+
+.empty-state p {
+    margin: 0;
+    color: #95a399;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.user-turn,
+.assistant-turn {
+    max-width: 82%;
+    margin-bottom: 25px;
+}
+
+.user-turn {
+    margin-left: auto;
+}
+
+.assistant-turn {
+    margin-right: auto;
+}
+
+.turn-label {
+    margin-bottom: 7px;
+    color: #9aa89f;
+    font-size: 8px;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+.user-turn .turn-label {
+    text-align: right;
+}
+
+.turn-content {
+    margin: 0;
+    padding: 12px 15px;
+    border-radius: 12px;
+    background: #eef5f0;
+    color: #3d594a;
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.assistant-turn .turn-content {
+    padding: 0;
+    background: transparent;
+    color: #34443b;
+    font-size: 13px;
+}
+
+.turn-citations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 11px;
+}
+
+.turn-citations button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    border: 1px solid #e1ebe3;
+    border-radius: 7px;
+    padding: 7px 9px;
+    background: #fbfdfb;
+    color: #638171;
+    font-size: 10px;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.turn-citations button:hover {
+    background: #edf6ef;
+}
+
+.turn-citations button span {
+    color: #458164;
+    font-weight: 700;
+}
+
+.typing-indicator {
+    color: #83998b;
+    font-size: 12px;
+    animation: pulse 1.3s ease-in-out infinite;
+}
+
+.typing-indicator span {
+    letter-spacing: 2px;
+}
+
+.error {
+    margin: 0 0 15px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    color: #9c4139;
+    background: #fff1ef;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.composer {
+    flex: 0 0 auto;
+    padding: 13px 17px 12px;
+    border-top: 1px solid #edf1ed;
+    background: #fff;
+}
+
+.composer textarea {
+    display: block;
+    width: 100%;
+    min-height: 53px;
+    max-height: 140px;
+    resize: none;
+    border: 0;
+    outline: 0;
+    padding: 6px 4px;
+    color: #34443b;
+    background: transparent;
+    font: 13px/1.6 'DM Sans', sans-serif;
+}
+
+.composer textarea::placeholder {
+    color: #a7b3aa;
+}
+
+.composer textarea:disabled {
+    opacity: .65;
+}
+
+.composer-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.composer-footer label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #94a49a;
+    font-size: 8px;
+    letter-spacing: .8px;
+    font-weight: 700;
+}
+
+.composer-footer select {
+    border: 1px solid #e5ece6;
+    border-radius: 6px;
+    padding: 5px 8px;
+    color: #52635a;
+    background: white;
+    font: 11px 'DM Sans', sans-serif;
+}
+
+.composer-footer>div {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.keyboard-hint {
+    color: #aab6ad;
+    font-size: 8px;
+    letter-spacing: .5px;
+}
+
+.composer-footer button {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 8px;
+    background: #285d4f;
+    color: white;
+    font-size: 19px;
+    cursor: pointer;
+}
+
+.composer-footer button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    justify-content: flex-end;
+    background: rgb(30 45 37 / 22%);
+}
+
+.drawer {
+    width: min(440px, 100%);
+    height: 100%;
+    overflow-y: auto;
+    padding: 28px;
+    background: white;
+    box-shadow: -12px 0 40px rgb(34 55 43 / 12%);
+    animation: slide-in .18s ease-out;
+}
+
+.drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.drawer-header>div>span {
+    color: #91a197;
+    font-size: 9px;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+.drawer-header h2 {
+    margin: 9px 0 0;
+    color: #34443b;
+    font: 600 17px 'Space Grotesk', sans-serif;
+    overflow-wrap: anywhere;
+}
+
+.drawer-header button {
+    border: 1px solid #e7ede8;
+    border-radius: 7px;
+    width: 34px;
+    height: 34px;
+    background: white;
+    color: #687970;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.page-label {
+    display: inline-block;
+    margin-top: 31px;
+    padding: 6px 9px;
+    border-radius: 20px;
+    color: #528068;
+    background: #edf6ef;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .7px;
+}
+
+.drawer blockquote {
+    margin: 18px 0 0;
+    padding: 18px;
+    border-left: 2px solid #7fab90;
+    background: #f7faf7;
+    color: #52635a;
+    font-size: 13px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+@keyframes pulse {
+    50% {
+        opacity: .45;
+    }
+}
+
+@keyframes slide-in {
+    from {
+        transform: translateX(20px);
+        opacity: .8;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 720px) {
+    .content {
+        padding: 35px 16px 20px;
+    }
+
+    .heading-row h1 {
+        font-size: 31px;
+    }
+
+    .chat-panel {
+        height: calc(100dvh - 205px);
+        min-height: 420px;
+    }
+
+    .message-list {
+        padding: 22px 16px;
+    }
+
+    .user-turn,
+    .assistant-turn {
+        max-width: 94%;
+    }
+
+    .keyboard-hint {
+        display: none;
+    }
+
+    .composer {
+        padding: 11px;
+    }
+
+    .drawer {
+        padding: 22px;
+    }
+}

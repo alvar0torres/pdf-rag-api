@@ -19,5 +19,5 @@ it('renders page content within the workspace layout', () => {
 
   expect(within(screen.getByRole('main')).getByRole('heading', { name: 'Page content' })).toBeTruthy()
   expect(within(screen.getByRole('navigation', { name: 'Workspace' })).getByText('Documents')).toBeTruthy()
-  expect(within(screen.getByRole('navigation', { name: 'Workspace' })).getByText('Ask')).toBeTruthy()
+  expect(within(screen.getByRole('navigation', { name: 'Workspace' })).getByText('Chat')).toBeTruthy()
 })

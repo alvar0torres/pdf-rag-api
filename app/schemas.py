@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import TypedDict
+from typing import Literal, TypedDict
 
 
 class ChunkInput(BaseModel):
@@ -22,9 +22,15 @@ class SearchRequest(BaseModel):
     limit: int = Field(default=5, ge=1, le=10)
 
 
+class ChatMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=8000)
+
+
 class AskRequest(BaseModel):
     question: str = Field(min_length=1)
     limit: int = Field(default=5, ge=1, le=10)
+    history: list[ChatMessage] = Field(default_factory=list, max_length=12)
 
 
 class Citation(BaseModel):
