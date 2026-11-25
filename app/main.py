@@ -10,11 +10,13 @@ from app.vector_store import (
     search_hybrid_chunks,
     store_chunks,
     delete_document_chunks,
+    list_document_chunks,
 )
 from app.schemas import (
     AskRequest,
     AskResponse,
     Citation,
+    ChunkInput,
     EmbeddingRequest,
     IndexChunksRequest,
     SearchRequest,
@@ -50,6 +52,33 @@ async def extract_pdf(file: UploadFile = File(...)):
         "chunk_count": sum(len(page["chunks"]) for page in pages),
         "pages": pages,
     }
+
+
+@app.get("/documents")
+def list_documents():
+    documents: dict[str, list[ChunkInput]] = {}
+    for chunk in list_document_chunks():
+        documents.setdefault(chunk.file_name, []).append(chunk)
+
+    return {
+        "documents": [
+            {
+                "filename": filename,
+                "chunk_count": len(chunks),
+                "page_count": len({chunk.page_number for chunk in chunks}),
+            }
+            for filename, chunks in sorted(documents.items())
+        ]
+    }
+
+
+@app.get("/documents/chunks")
+def get_document_chunks(filename: str):
+    chunks = list_document_chunks(filename)
+    if not chunks:
+        raise HTTPException(status_code=404, detail="No indexed document found.")
+    chunks.sort(key=lambda chunk: (chunk.page_number, chunk.chunk_index))
+    return {"filename": filename, "chunks": chunks}
 
 
 @app.post("/documents/index")

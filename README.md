@@ -59,13 +59,15 @@ npm install
 npm run dev
 ```
 
-Open the URL printed by Vite (normally `http://localhost:5173`). The development server proxies API requests to `http://127.0.0.1:8000`. In **Documents**, drop or select one PDF to preview its extracted chunks, then select **Index document** to create embeddings and store them. Previewing does not index the document; indexing can incur OpenAI charges and replaces indexed chunks with the same filename. In **Chat**, ask questions and follow up in the same conversation; recent turns are included as context for retrieval and answer generation. Chat requests use the configured embedding, reranking, and answer providers and may incur charges. Conversations remain in the page until cleared or refreshed. Refreshing the page clears the preview, not the index.
+Open the URL printed by Vite (normally `http://localhost:5173`). The development server proxies API requests to `http://127.0.0.1:8000`. In **Index documents**, drop or select one PDF to preview its extracted chunks, then select **Index document** to create embeddings and store them. Previewing does not index the document; indexing can incur OpenAI charges and replaces indexed chunks with the same filename. In **Explorer**, browse indexed filenames and stored text chunks; the original PDF is not stored. Page counts in the explorer count pages with indexed text, not total PDF pages. In **Chat**, ask questions and follow up in the same conversation; recent turns are included as context for retrieval and answer generation. Chat requests use the configured embedding, reranking, and answer providers and may incur charges. Conversations remain in the page until cleared, refreshed, or navigated away from. Refreshing the page clears the preview, not the index.
 
 ## Main endpoints
 
 | Method | Path | Purpose |
 |---|---|---|
 | `GET` | `/health` | Check that the API is running. |
+| `GET` | `/documents` | List indexed filenames and chunk/page counts. |
+| `GET` | `/documents/chunks?filename=example.pdf` | Retrieve indexed chunks for a filename. |
 | `POST` | `/documents/extract` | Extract page text and chunks from an uploaded PDF without indexing it. |
 | `POST` | `/documents/ingest` | Extract a PDF, create embeddings, and replace indexed chunks with the same filename. |
 | `POST` | `/documents/index` | Create embeddings and index supplied chunks. |

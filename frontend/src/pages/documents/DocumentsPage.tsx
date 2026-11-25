@@ -51,7 +51,7 @@ function DocumentsPage() {
     <div className={styles.content}>
       <div className={styles.eyebrow}><span /> KNOWLEDGE BASE</div>
       <div className={styles['heading-row']}>
-        <div><h1>Documents</h1><p>Bring your knowledge in. See how it comes together.</p></div>
+        <div><h1>Index documents</h1><p>Bring your knowledge in. See how it comes together.</p></div>
         <div className={styles['heading-icon']} aria-hidden="true">✳</div>
       </div>
       <DocumentDropzone busy={status !== 'idle'} onSelect={(selected) => void selectFile(selected)} onError={setError} />

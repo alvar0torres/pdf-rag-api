@@ -7,6 +7,8 @@ export type Extraction = {
   pages: Page[]
 }
 type Ingestion = { indexed_count: number }
+export type IndexedDocument = { filename: string; chunk_count: number; page_count: number }
+export type IndexedChunk = Chunk & { file_name: string; page_number: number }
 
 async function uploadPdf<T>(path: string, file: File): Promise<T> {
   const body = new FormData()
@@ -35,4 +37,23 @@ export function extractDocument(file: File) {
 
 export function ingestDocument(file: File) {
   return uploadPdf<Ingestion>('/documents/ingest', file)
+}
+
+async function getDocuments<T>(path: string, signal: AbortSignal): Promise<T> {
+  const response = await fetch(`/api${path}`, { signal })
+  if (!response.ok) {
+    throw new Error(`Could not load indexed documents (${response.status}).`)
+  }
+  return response.json() as Promise<T>
+}
+
+export async function listDocuments(signal: AbortSignal): Promise<IndexedDocument[]> {
+  const result = await getDocuments<{ documents: IndexedDocument[] }>('/documents', signal)
+  return result.documents
+}
+
+export async function getDocumentChunks(filename: string, signal: AbortSignal): Promise<IndexedChunk[]> {
+  const query = new URLSearchParams({ filename })
+  const result = await getDocuments<{ chunks: IndexedChunk[] }>(`/documents/chunks?${query}`, signal)
+  return result.chunks
 }

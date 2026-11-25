@@ -69,11 +69,16 @@
 }
 
 .nav-indicator {
+    display: none;
     width: 6px;
     height: 6px;
     border-radius: 50%;
     background: #43856e;
     margin-left: auto;
+}
+
+.nav-active .nav-indicator {
+    display: block;
 }
 
 .sidebar-footer {
@@ -170,9 +175,20 @@
         display: none;
     }
 
-    .nav-indicator,
+    .nav-active .nav-indicator,
     .sidebar-footer {
         display: none;
+    }
+
+    @media (max-width: 480px) {
+        .sidebar {
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sidebar nav {
+            width: 100%;
+        }
     }
 
     .app-shell {

@@ -140,3 +140,25 @@ def test_delete_document_chunks_sends_file_name_filter(monkeypatch):
     assert isinstance(condition, models.FieldCondition)
     assert condition.key == "file_name"
     assert condition.match == models.MatchValue(value="demo.pdf")
+
+
+def test_list_document_chunks_reads_all_pages_and_filters_by_filename(monkeypatch):
+    payloads = [
+        {"text": "first", "file_name": "demo.pdf", "page_number": 2, "chunk_index": 1},
+        {"text": "second", "file_name": "demo.pdf", "page_number": 1, "chunk_index": 1},
+    ]
+    scroll = Mock(side_effect=[
+        ([Mock(payload=payloads[0])], "next"),
+        ([Mock(payload=payloads[1])], None),
+    ])
+    monkeypatch.setattr(vector_store, "client", Mock(scroll=scroll))
+
+    chunks = vector_store.list_document_chunks("demo.pdf")
+
+    assert [chunk.model_dump() for chunk in chunks] == payloads
+    assert scroll.call_count == 2
+    assert scroll.call_args_list[1].kwargs["offset"] == "next"
+    assert scroll.call_args_list[0].kwargs["with_vectors"] is False
+    assert scroll.call_args_list[0].kwargs["scroll_filter"] == models.Filter(
+        must=[models.FieldCondition(key="file_name", match=models.MatchValue(value="demo.pdf"))]
+    )

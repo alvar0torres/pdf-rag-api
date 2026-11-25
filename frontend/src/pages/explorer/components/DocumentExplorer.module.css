@@ -1,0 +1,136 @@
+.explorer {
+    margin-top: 32px;
+}
+
+.heading {
+    color: #242d2a;
+    font: 600 16px 'Space Grotesk', sans-serif;
+    margin: 0;
+}
+
+.description {
+    color: #829087;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.refresh {
+    border: 1px solid #dfe9e1;
+    border-radius: 7px;
+    background: white;
+    color: #285d4f;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    margin: 4px 0 14px;
+}
+
+.refresh:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+.list {
+    border: 1px solid #e5ece6;
+    border-radius: 11px;
+    background: white;
+    overflow: hidden;
+}
+
+.document {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 16px 18px;
+    border: 0;
+    border-top: 1px solid #edf1ed;
+    background: white;
+    color: #426d58;
+    text-align: left;
+    cursor: pointer;
+}
+
+.document:first-child {
+    border-top: 0;
+}
+
+.document:hover,
+.document[aria-expanded="true"] {
+    background: #f3f8f4;
+}
+
+.document>span:first-child {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.document strong {
+    color: #34443b;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.document small {
+    color: #91a197;
+    font-size: 11px;
+}
+
+.detail {
+    margin-top: 16px;
+    border: 1px solid #e5ece6;
+    border-radius: 11px;
+    background: white;
+    overflow: hidden;
+}
+
+.detail h3 {
+    margin: 0;
+    padding: 17px 19px;
+    color: #475b51;
+    font: 600 14px 'Space Grotesk', sans-serif;
+    overflow-wrap: anywhere;
+}
+
+.chunk {
+    border-top: 1px solid #edf1ed;
+    padding: 18px 19px;
+}
+
+.chunk div {
+    color: #589171;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .8px;
+}
+
+.chunk p {
+    color: #596961;
+    font-size: 12px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    margin: 12px 0 0;
+}
+
+.notice,
+.error {
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.notice {
+    color: #416957;
+    background: #edf4ef;
+}
+
+.error {
+    color: #9c4139;
+    background: #fff1ef;
+}

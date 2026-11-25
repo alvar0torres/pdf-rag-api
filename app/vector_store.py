@@ -2,6 +2,8 @@ from uuid import uuid4
 
 from qdrant_client import QdrantClient, models
 
+from app.schemas import ChunkInput
+
 COLLECTION_NAME = "document_chunks"
 HYBRID_PREFETCH_LIMIT = 20
 VECTOR_SIZE = (
@@ -47,6 +49,35 @@ def store_chunks(
     ]
 
     client.upsert(collection_name=COLLECTION_NAME, points=points)
+
+
+def list_document_chunks(file_name: str | None = None) -> list[ChunkInput]:
+    scroll_filter = None
+    if file_name is not None:
+        scroll_filter = models.Filter(
+            must=[
+                models.FieldCondition(
+                    key="file_name",
+                    match=models.MatchValue(value=file_name),
+                )
+            ]
+        )
+
+    chunks: list[ChunkInput] = []
+    offset = None
+    while True:
+        points, offset = client.scroll(
+            collection_name=COLLECTION_NAME,
+            scroll_filter=scroll_filter,
+            limit=100,
+            offset=offset,
+            with_payload=True,
+            with_vectors=False,
+        )
+        chunks.extend(ChunkInput.model_validate(point.payload) for point in points)
+        if offset is None:
+            break
+    return chunks
 
 
 def search_chunks(
