@@ -7,7 +7,7 @@ A learning project that demonstrates a Retrieval-Augmented Generation (RAG) API 
 1. Upload a PDF for extraction or ingestion.
 2. Extract text page by page and split it into overlapping chunks using LangChain's recursive character splitter.
 3. Generate embeddings with OpenAI's `text-embedding-3-small` model and store them in Qdrant.
-4. Combine dense and BM25 retrieval with Qdrant's RRF, then rerank the candidates with Cohere.
+4. Combine dense and BM25 retrieval with Qdrant's RRF, then rerank the candidates with Cohere. For chat follow-ups, the current question and up to six previous messages are used as retrieval context.
 5. Pass the top-ranked chunks to `gpt-4o-mini` and map its source IDs back to document citations.
 
 ## Requirements
@@ -74,7 +74,7 @@ Open the URL printed by Vite (normally `http://localhost:5173`). The development
 | `POST` | `/search` | Return the top matching chunks for a question. |
 | `POST` | `/search/keyword` | Return the top matching chunks using Qdrant's BM25 text search. |
 | `POST` | `/search/hybrid` | Combine dense and BM25 results using Qdrant's RRF fusion. |
-| `POST` | `/ask` | Generate an answer using retrieved chunks and return source citations. |
+| `POST` | `/ask` | Generate an answer using retrieved chunks and return source citations; optionally include conversation history. |
 | `DELETE` | `/documents/delete?filename=example.pdf` | Delete indexed chunks for a filename. |
 
 ### Example: ingest a PDF and ask a question
@@ -104,6 +104,8 @@ An `/ask` response has this shape:
   ]
 }
 ```
+
+For follow-up questions, `/ask` accepts an optional `history` list of messages with `role` (`user` or `assistant`) and `content` fields. The API accepts up to 12 previous messages and uses the most recent six for retrieval and answer generation. Older messages may remain visible in the frontend but are not used as context.
 
 ## Tests
 
@@ -145,6 +147,6 @@ The benchmark makes one batched OpenAI embeddings request and one Cohere reranki
 - `/ask` retrieves hybrid candidates, reranks them with Cohere, then generates an answer with citations.
 - The retrieval benchmark evaluates retrieval only; answer quality and citation correctness are not yet evaluated.
 - The Qdrant database is local and persistent in `qdrant_data/`.
-- The frontend currently supports document preview and indexing only; the ask and evaluation interfaces are not yet implemented.
+- The frontend supports PDF preview and indexing, indexed-document exploration, and chat with source citations. An evaluation interface is not yet implemented.
 - The answer response includes an answer and citations; a confidence score is not implemented.
 - This is a learning project, not a hardened production deployment. Authentication, authorization, deployment configuration, and operational monitoring are outside its current scope.
