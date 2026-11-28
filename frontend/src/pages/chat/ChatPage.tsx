@@ -17,11 +17,12 @@ function ChatPage() {
   const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
   const questionRef = useRef<HTMLTextAreaElement>(null)
-  const endOfChatRef = useRef<HTMLDivElement>(null)
+  const messageListRef = useRef<HTMLDivElement>(null)
   const hasSubmittedRef = useRef(false)
 
   useEffect(() => {
-    endOfChatRef.current?.scrollIntoView?.({ behavior: 'smooth' })
+    const messageList = messageListRef.current
+    if (messageList) messageList.scrollTop = messageList.scrollHeight
   }, [turns, loading])
 
   useEffect(() => {
@@ -85,7 +86,7 @@ function ChatPage() {
           <button type="button" onClick={startNewChat} disabled={loading || turns.length === 0}>New chat <span aria-hidden="true">↻</span></button>
         </header>
 
-        <div className={styles['message-list']} aria-live="polite">
+        <div ref={messageListRef} className={styles['message-list']} aria-live="polite">
           {turns.length === 0 && !loading && (
             <div className={styles['empty-state']}>
               <span aria-hidden="true">✳</span>
@@ -119,7 +120,6 @@ function ChatPage() {
             </article>
           )}
           {error && <div className={styles.error} role="alert">{error}</div>}
-          <div ref={endOfChatRef} />
         </div>
 
         <form ref={formRef} className={styles.composer} onSubmit={(event) => void submitQuestion(event)}>
