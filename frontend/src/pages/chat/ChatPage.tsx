@@ -2,18 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import type { FormEvent, KeyboardEvent } from 'react'
 import { askQuestion } from '../../api/ask'
 import type { Citation, ConversationMessage } from '../../api/ask'
+import type { useChatState } from './useChatState'
 import styles from './ChatPage.module.css'
 
-type UserTurn = { role: 'user'; content: string }
-type AssistantTurn = { role: 'assistant'; content: string; citations: Citation[] }
-type Turn = UserTurn | AssistantTurn
-
-function ChatPage() {
+function ChatPage({ chat }: { chat: ReturnType<typeof useChatState> }) {
   const [question, setQuestion] = useState('')
   const [limit, setLimit] = useState(5)
-  const [turns, setTurns] = useState<Turn[]>([])
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const { turns, setTurns, error, setError, loading, setLoading } = chat
   const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
   const questionRef = useRef<HTMLTextAreaElement>(null)

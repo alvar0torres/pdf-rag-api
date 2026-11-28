@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 import App from './App'
 import { extractDocument, ingestDocument, listDocuments } from './api/documents'
 import { getEvaluationInfo } from './api/evaluations'
+import { askQuestion } from './api/ask'
+import type { Answer } from './api/ask'
 
 vi.mock('./api/documents', () => ({
   extractDocument: vi.fn(),
@@ -12,6 +14,7 @@ vi.mock('./api/documents', () => ({
   getDocumentChunks: vi.fn(),
 }))
 vi.mock('./api/evaluations', () => ({ getEvaluationInfo: vi.fn(), runEvaluation: vi.fn() }))
+vi.mock('./api/ask', () => ({ askQuestion: vi.fn() }))
 afterEach(cleanup)
 
 it('opens a fresh explorer after indexing and navigates back to indexing', async () => {
@@ -53,4 +56,52 @@ it('navigates to the evaluation page', async () => {
   fireEvent.click(screen.getByRole('link', { name: 'Evaluation' }))
   expect(await screen.findByText('Test benchmark')).toBeTruthy()
   expect(document.title).toBe('Evaluation | RAG Lab')
+})
+
+it('preserves chat and follow-up history across navigation until cleared', async () => {
+  window.history.replaceState({}, '', '/chat')
+  vi.mocked(askQuestion)
+    .mockResolvedValueOnce({ answer: 'First answer', citations: [] })
+    .mockResolvedValueOnce({ answer: 'Second answer', citations: [] })
+  render(<App />)
+
+  fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'First question' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Send message' }))
+  await screen.findByText('First answer')
+  fireEvent.click(screen.getByRole('link', { name: 'Index documents' }))
+  fireEvent.click(screen.getByRole('link', { name: 'Chat' }))
+
+  expect(screen.getByText('First question')).toBeTruthy()
+  expect(screen.getByText('First answer')).toBeTruthy()
+  fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Follow-up' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Send message' }))
+  await screen.findByText('Second answer')
+  expect(askQuestion).toHaveBeenLastCalledWith('Follow-up', 5, [
+    { role: 'user', content: 'First question' },
+    { role: 'assistant', content: 'First answer' },
+  ])
+  fireEvent.click(screen.getByRole('button', { name: 'New chat' }))
+  expect(screen.queryByText('First answer')).toBeNull()
+  fireEvent.click(screen.getByRole('link', { name: 'Index documents' }))
+  fireEvent.click(screen.getByRole('link', { name: 'Chat' }))
+  expect(screen.queryByText('First question')).toBeNull()
+})
+
+it('keeps an in-flight answer when leaving and returning to chat', async () => {
+  window.history.replaceState({}, '', '/chat')
+  let resolveAnswer!: (answer: Answer) => void
+  vi.mocked(askQuestion).mockReturnValueOnce(new Promise((resolve) => { resolveAnswer = resolve }))
+  render(<App />)
+
+  fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Pending question' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Send message' }))
+  fireEvent.click(screen.getByRole('link', { name: 'Index documents' }))
+  fireEvent.click(screen.getByRole('link', { name: 'Chat' }))
+  expect(screen.getByLabelText('Message').matches(':disabled')).toBe(true)
+  fireEvent.click(screen.getByRole('link', { name: 'Index documents' }))
+  await act(async () => { resolveAnswer({ answer: 'Completed answer', citations: [] }) })
+  fireEvent.click(screen.getByRole('link', { name: 'Chat' }))
+
+  expect(screen.getByText('Pending question')).toBeTruthy()
+  expect(screen.getByText('Completed answer')).toBeTruthy()
 })

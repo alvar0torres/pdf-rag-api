@@ -3,11 +3,16 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { askQuestion } from '../../api/ask'
 import ChatPage from './ChatPage'
+import { useChatState } from './useChatState'
 
 vi.mock('../../api/ask', () => ({ askQuestion: vi.fn() }))
 
 beforeEach(() => vi.resetAllMocks())
 afterEach(cleanup)
+
+function TestChatPage() {
+  return <ChatPage chat={useChatState()} />
+}
 
 describe('ChatPage', () => {
   it('sends prior turns with follow-ups and opens cited source details', async () => {
@@ -17,7 +22,7 @@ describe('ChatPage', () => {
         citations: [{ file_name: 'botany.pdf', page_number: 4, quote: 'Plants convert sunlight into energy.' }],
       })
       .mockResolvedValueOnce({ answer: 'Roots absorb water and minerals.', citations: [] })
-    render(<ChatPage />)
+    render(<TestChatPage />)
 
     fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'What is photosynthesis?' } })
     fireEvent.click(screen.getByRole('button', { name: 'Send message' }))
@@ -40,7 +45,7 @@ describe('ChatPage', () => {
     vi.mocked(askQuestion)
       .mockRejectedValueOnce(new Error('Answer provider unavailable.'))
       .mockResolvedValueOnce({ answer: 'A grounded answer.', citations: [] })
-    render(<ChatPage />)
+    render(<TestChatPage />)
 
     fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Ask a question' } })
     fireEvent.click(screen.getByRole('button', { name: 'Send message' }))
