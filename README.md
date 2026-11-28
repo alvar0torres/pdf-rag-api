@@ -66,6 +66,8 @@ Open the URL printed by Vite (normally `http://localhost:5173`). The development
 | Method | Path | Purpose |
 |---|---|---|
 | `GET` | `/health` | Check that the API is running. |
+| `GET` | `/evaluations/retrieval` | Get retrieval benchmark details. |
+| `POST` | `/evaluations/retrieval` | Run the retrieval benchmark and return metrics and per-question ranks. |
 | `GET` | `/documents` | List indexed filenames and chunk/page counts. |
 | `GET` | `/documents/chunks?filename=example.pdf` | Retrieve indexed chunks for a filename. |
 | `POST` | `/documents/extract` | Extract page text and chunks from an uploaded PDF without indexing it. |
@@ -140,6 +142,10 @@ python -m evals.evaluate_retrieval
 
 The benchmark makes one batched OpenAI embeddings request and one Cohere reranking request per question, so provider usage may incur charges. It requires `OPENAI_API_KEY` and `COHERE_API_KEY` in `.env`. Cohere rate limits may stop the run; if that happens, wait for the limit to reset before trying again.
 
+Alternatively, with `intro_botany.pdf` indexed, open **Evaluation** in the frontend and select **Run evaluation**. The API runs the same benchmark in its own process, so the API server must remain running. The page shows metrics and per-question ranks after the run completes; leaving or refreshing it discards the displayed results and may not stop provider requests already in progress. This first version uses the bundled dataset and fixed benchmark configuration.
+
+If a provider request fails, the page identifies OpenAI or Cohere and suggests checking its API key and provider logs. The API log records the provider and error type without logging provider response details.
+
 ## Current scope and limitations
 
 - PDF documents only; Markdown and other formats are not implemented.
@@ -147,6 +153,6 @@ The benchmark makes one batched OpenAI embeddings request and one Cohere reranki
 - `/ask` retrieves hybrid candidates, reranks them with Cohere, then generates an answer with citations.
 - The retrieval benchmark evaluates retrieval only; answer quality and citation correctness are not yet evaluated.
 - The Qdrant database is local and persistent in `qdrant_data/`.
-- The frontend supports PDF preview and indexing, indexed-document exploration, and chat with source citations. An evaluation interface is not yet implemented.
+- The frontend supports PDF preview and indexing, indexed-document exploration, chat with source citations, and the bundled retrieval evaluation.
 - The answer response includes an answer and citations; a confidence score is not implemented.
 - This is a learning project, not a hardened production deployment. Authentication, authorization, deployment configuration, and operational monitoring are outside its current scope.

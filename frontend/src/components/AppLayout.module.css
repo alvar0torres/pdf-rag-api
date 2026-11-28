@@ -165,6 +165,7 @@
     .sidebar nav {
         display: flex;
         gap: 5px;
+        flex-wrap: wrap;
     }
 
     .navLink {

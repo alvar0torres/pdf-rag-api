@@ -1,4 +1,7 @@
+import logging
+
 from fastapi import FastAPI, File, HTTPException, UploadFile
+from openai import OpenAIError
 
 from app.document_processing import extract_pdf_data
 from app.embeddings import create_embeddings
@@ -21,14 +24,78 @@ from app.schemas import (
     IndexChunksRequest,
     SearchRequest,
 )
+from evals.evaluate_retrieval import (
+    CANDIDATE_LIMIT,
+    DEFAULT_DATASET,
+    MODES,
+    TOP_K,
+    EvaluationPreconditionError,
+    calculate_metrics,
+    load_dataset,
+    run_evaluation,
+)
 
 app = FastAPI(title="Production-Grade RAG API")
 RERANK_CANDIDATE_LIMIT = 20
+logger = logging.getLogger(__name__)
 
 
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+
+@app.get("/evaluations/retrieval")
+def retrieval_evaluation_info():
+    dataset = load_dataset(DEFAULT_DATASET)
+    return {
+        "title": dataset.title,
+        "source_file": dataset.source_file,
+        "question_count": len(dataset.questions),
+        "top_k": TOP_K,
+        "candidate_limit": CANDIDATE_LIMIT,
+        "modes": MODES,
+    }
+
+
+@app.post("/evaluations/retrieval")
+async def evaluate_retrieval():
+    dataset = load_dataset(DEFAULT_DATASET)
+    try:
+        ranks_by_mode = await run_evaluation(dataset)
+    except EvaluationPreconditionError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except (OpenAIError, RerankerProviderError) as error:
+        provider = "OpenAI" if isinstance(error, OpenAIError) else "Cohere"
+        logger.warning(
+            "Retrieval evaluation %s request failed (%s)",
+            provider,
+            type(error).__name__,
+        )
+        raise HTTPException(
+            status_code=502,
+            detail=f"{provider} request failed. Check its API key and provider logs.",
+        ) from error
+
+    return {
+        "title": dataset.title,
+        "source_file": dataset.source_file,
+        "question_count": len(dataset.questions),
+        "top_k": TOP_K,
+        "candidate_limit": CANDIDATE_LIMIT,
+        "modes": [
+            {"mode": mode, "metrics": calculate_metrics(ranks_by_mode[mode])}
+            for mode in MODES
+        ],
+        "questions": [
+            {
+                "id": question.id,
+                "question": question.question,
+                "ranks": {mode: ranks_by_mode[mode][index] for mode in MODES},
+            }
+            for index, question in enumerate(dataset.questions)
+        ],
+    }
 
 
 @app.post("/embeddings")

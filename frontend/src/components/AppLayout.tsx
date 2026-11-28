@@ -4,7 +4,7 @@ import styles from './AppLayout.module.css'
 
 function AppLayout() {
   const { pathname } = useLocation()
-  const pageTitle = pathname === '/chat' ? 'Chat' : pathname === '/explorer' ? 'Document explorer' : 'Index documents'
+  const pageTitle = pathname === '/chat' ? 'Chat' : pathname === '/explorer' ? 'Document explorer' : pathname === '/evaluation' ? 'Evaluation' : 'Index documents'
 
   useEffect(() => {
     document.title = `${pageTitle} | RAG Lab`
@@ -27,6 +27,9 @@ function AppLayout() {
           </NavLink>
           <NavLink to="/chat" className={({ isActive }) => `${styles.navLink} ${isActive ? styles['nav-active'] : ''}`}>
             <span aria-hidden="true">✳</span> Chat <span className={styles['nav-indicator']} />
+          </NavLink>
+          <NavLink to="/evaluation" className={({ isActive }) => `${styles.navLink} ${isActive ? styles['nav-active'] : ''}`}>
+            <span aria-hidden="true">▥</span> Evaluation <span className={styles['nav-indicator']} />
           </NavLink>
         </nav>
         <div className={styles['sidebar-footer']}>

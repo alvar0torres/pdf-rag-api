@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 import App from './App'
 import { extractDocument, ingestDocument, listDocuments } from './api/documents'
+import { getEvaluationInfo } from './api/evaluations'
 
 vi.mock('./api/documents', () => ({
   extractDocument: vi.fn(),
@@ -10,6 +11,7 @@ vi.mock('./api/documents', () => ({
   listDocuments: vi.fn(),
   getDocumentChunks: vi.fn(),
 }))
+vi.mock('./api/evaluations', () => ({ getEvaluationInfo: vi.fn(), runEvaluation: vi.fn() }))
 afterEach(cleanup)
 
 it('opens a fresh explorer after indexing and navigates back to indexing', async () => {
@@ -18,6 +20,7 @@ it('opens a fresh explorer after indexing and navigates back to indexing', async
     filename: 'new.pdf', page_count: 1, chunk_count: 1,
     pages: [{ page_number: 1, chunks: [{ chunk_index: 1, text: 'Preview text' }] }],
   })
+
   vi.mocked(ingestDocument).mockResolvedValue({ indexed_count: 1 })
   vi.mocked(listDocuments).mockResolvedValue([{ filename: 'new.pdf', chunk_count: 1, page_count: 1 }])
   render(<App />)
@@ -37,4 +40,17 @@ it('opens a fresh explorer after indexing and navigates back to indexing', async
   fireEvent.click(screen.getByRole('link', { name: 'Index documents' }))
   expect(screen.getByLabelText('Choose a PDF file')).toBeTruthy()
   expect(screen.queryByRole('heading', { name: 'Indexed documents' })).toBeNull()
+})
+
+it('navigates to the evaluation page', async () => {
+  window.history.replaceState({}, '', '/documents')
+  vi.mocked(getEvaluationInfo).mockResolvedValue({
+    title: 'Test benchmark', source_file: 'test.pdf', question_count: 2,
+    top_k: 5, candidate_limit: 20, modes: ['dense'],
+  })
+  render(<App />)
+
+  fireEvent.click(screen.getByRole('link', { name: 'Evaluation' }))
+  expect(await screen.findByText('Test benchmark')).toBeTruthy()
+  expect(document.title).toBe('Evaluation | RAG Lab')
 })

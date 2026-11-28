@@ -21,6 +21,10 @@ MODES = ("dense", "hybrid", "hybrid + Cohere")
 DEFAULT_DATASET = Path(__file__).with_name("botany_questions.json")
 
 
+class EvaluationPreconditionError(ValueError):
+    """The indexed benchmark data is missing or incompatible."""
+
+
 class EvidencePassage(BaseModel):
     page_number: int = Field(ge=1)
     text: str = Field(min_length=1)
@@ -179,7 +183,7 @@ def validate_indexed_evidence(
                 )
                 is None
             ):
-                raise ValueError(
+                raise EvaluationPreconditionError(
                     f"Evidence for question {question.id!r} on PDF page "
                     f"{passage.page_number} was not found in an indexed chunk. "
                     "Check the document version, labels, and chunking, then re-ingest "
@@ -187,9 +191,7 @@ def validate_indexed_evidence(
                 )
 
 
-async def run_evaluation(
-    dataset: EvaluationDataset,
-) -> dict[str, list[int | None]]:
+async def run_evaluation(dataset: EvaluationDataset) -> dict[str, list[int | None]]:
     from app.embeddings import create_embeddings
     from app.reranker import rerank_sources
     from app.vector_store import (
@@ -218,7 +220,7 @@ async def run_evaluation(
         exact=True,
     ).count
     if source_count == 0:
-        raise ValueError(
+        raise EvaluationPreconditionError(
             f"No indexed chunks found for {dataset.source_file!r}. "
             "Ingest the benchmark PDF using that filename first."
         )
@@ -263,16 +265,6 @@ async def run_evaluation(
                     evidence=question.evidence,
                 )
             )
-
-        rank_summary = ", ".join(
-            f"{mode}: {rank if rank is not None else 'not in top 5'}"
-            for mode, rank in zip(
-                MODES,
-                (ranks_by_mode[mode][-1] for mode in MODES),
-                strict=True,
-            )
-        )
-        print(f"{question.id}: {rank_summary}")
 
     return ranks_by_mode
 
