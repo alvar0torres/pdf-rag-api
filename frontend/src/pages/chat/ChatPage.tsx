@@ -95,7 +95,7 @@ function ChatPage() {
           )}
           {turns.map((turn, turnIndex) => (
             <article className={turn.role === 'user' ? styles['user-turn'] : styles['assistant-turn']} key={`${turn.role}-${turnIndex}`}>
-              <div className={styles['turn-label']}>{turn.role === 'user' ? 'YOU' : 'RAG LAB'}</div>
+              <div className={styles['turn-label']}>{turn.role === 'user' ? 'YOU' : 'RAG-LAB'}</div>
               <p className={styles['turn-content']}>{turn.content}</p>
               {turn.role === 'assistant' && turn.citations.length > 0 && (
                 <div className={styles['turn-citations']} aria-label="Answer citations">
@@ -114,7 +114,7 @@ function ChatPage() {
           ))}
           {loading && (
             <article className={styles['assistant-turn']} role="status">
-              <div className={styles['turn-label']}>RAG LAB</div>
+              <div className={styles['turn-label']}>RAG-LAB</div>
               <p className={styles['typing-indicator']}>Searching your sources<span>...</span></p>
             </article>
           )}

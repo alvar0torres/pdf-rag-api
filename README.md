@@ -1,4 +1,4 @@
-# PDF RAG API
+# RAG-Lab
 
 A learning project that demonstrates a Retrieval-Augmented Generation (RAG) API for PDF documents. It extracts and chunks PDF text, creates embeddings, stores chunks in a local Qdrant database, and answers questions with citations linked to retrieved source chunks.
 

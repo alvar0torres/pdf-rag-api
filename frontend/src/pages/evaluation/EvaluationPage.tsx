@@ -45,7 +45,7 @@ function EvaluationPage() {
 
   return (
     <div className={styles.content}>
-      <div className={styles.eyebrow}><span /> RAG LAB</div>
+      <div className={styles.eyebrow}><span /> RAG-LAB</div>
       <div className={styles.heading}>
         <div><h1>Evaluation</h1><p>Compare retrieval methods against a labeled benchmark.</p></div>
         <span aria-hidden="true">✳</span>

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { askQuestion } from '../../api/ask'
 import ChatPage from './ChatPage'
@@ -22,7 +22,7 @@ describe('ChatPage', () => {
     fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'What is photosynthesis?' } })
     fireEvent.click(screen.getByRole('button', { name: 'Send message' }))
     expect(await screen.findByText('Photosynthesis uses sunlight.')).toBeTruthy()
-    expect(document.activeElement).toBe(screen.getByLabelText('Message'))
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByLabelText('Message')))
     fireEvent.click(screen.getByRole('button', { name: /botany.pdf/ }))
     expect(screen.getByRole('dialog').textContent).toContain('Plants convert sunlight into energy.')
     fireEvent.click(screen.getByRole('button', { name: 'Close source details' }))

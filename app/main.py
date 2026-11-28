@@ -35,7 +35,7 @@ from evals.evaluate_retrieval import (
     run_evaluation,
 )
 
-app = FastAPI(title="Production-Grade RAG API")
+app = FastAPI(title="RAG-Lab API")
 RERANK_CANDIDATE_LIMIT = 20
 logger = logging.getLogger(__name__)
 

@@ -56,7 +56,7 @@ function DocumentsPage() {
       </div>
       <DocumentDropzone busy={status !== 'idle'} onSelect={(selected) => void selectFile(selected)} onError={setError} />
       <DocumentPreview preview={preview} status={status} error={error} indexedCount={indexedCount} onIndex={() => void indexDocument()} />
-      <footer className={styles['page-footer']}><span>RAG LAB <span> / </span> DOCUMENTS</span></footer>
+      <footer className={styles['page-footer']}><span>RAG-LAB <span> / </span> DOCUMENTS</span></footer>
     </div>
   )
 }
