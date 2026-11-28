@@ -63,9 +63,10 @@
     font-weight: 700;
 }
 
-.nav-active>span:first-child {
-    font-size: 19px;
-    line-height: 12px;
+.navIcon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
 }
 
 .nav-indicator {
@@ -172,7 +173,7 @@
         padding: 9px;
     }
 
-    .navLink > span:first-child {
+    .navIcon {
         display: none;
     }
 
