@@ -58,6 +58,15 @@ it('navigates to the evaluation page', async () => {
   expect(document.title).toBe('Evaluation | RAG Lab')
 })
 
+it('navigates to the embedding map', async () => {
+  window.history.replaceState({}, '', '/documents')
+  render(<App />)
+
+  fireEvent.click(screen.getByRole('link', { name: 'Embedding map' }))
+  expect(await screen.findByRole('heading', { name: 'Embedding map' })).toBeTruthy()
+  expect(document.title).toBe('Embedding map | RAG Lab')
+})
+
 it('preserves chat and follow-up history across navigation until cleared', async () => {
   window.history.replaceState({}, '', '/chat')
   vi.mocked(askQuestion)

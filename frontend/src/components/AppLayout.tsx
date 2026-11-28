@@ -2,9 +2,16 @@ import { useEffect } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import styles from './AppLayout.module.css'
 
+const pageTitles: Record<string, string> = {
+  '/chat': 'Chat',
+  '/explorer': 'Document explorer',
+  '/evaluation': 'Evaluation',
+  '/map': 'Embedding map',
+}
+
 function AppLayout() {
   const { pathname } = useLocation()
-  const pageTitle = pathname === '/chat' ? 'Chat' : pathname === '/explorer' ? 'Document explorer' : pathname === '/evaluation' ? 'Evaluation' : 'Index documents'
+  const pageTitle = pageTitles[pathname] ?? 'Index documents'
 
   useEffect(() => {
     document.title = `${pageTitle} | RAG Lab`
@@ -32,6 +39,12 @@ function AppLayout() {
               <circle cx="16" cy="16" r="3" /><path d="m18.2 18.2 2.8 2.8" />
             </svg>
             Explorer <span className={styles['nav-indicator']} />
+          </NavLink>
+          <NavLink to="/map" className={({ isActive }) => `${styles.navLink} ${isActive ? styles['nav-active'] : ''}`}>
+            <svg className={styles.navIcon} aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="6" cy="7" r="2" /><circle cx="18" cy="6" r="2" /><circle cx="12" cy="18" r="2" /><path d="m8 7 8-1M7 9l4 7m6-8-4 8" />
+            </svg>
+            Embedding map <span className={styles['nav-indicator']} />
           </NavLink>
           <NavLink to="/chat" className={({ isActive }) => `${styles.navLink} ${isActive ? styles['nav-active'] : ''}`}>
             <svg className={styles.navIcon} aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">

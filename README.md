@@ -69,6 +69,7 @@ Open the URL printed by Vite (normally `http://localhost:5173`). The development
 | `GET` | `/evaluations/retrieval` | Get retrieval benchmark details. |
 | `POST` | `/evaluations/retrieval` | Run the retrieval benchmark and return metrics and per-question ranks. |
 | `GET` | `/documents` | List indexed filenames and chunk/page counts. |
+| `GET` | `/documents/map` | Project indexed embeddings into 3D and cluster them for visualization. |
 | `GET` | `/documents/chunks?filename=example.pdf` | Retrieve indexed chunks for a filename. |
 | `POST` | `/documents/extract` | Extract page text and chunks from an uploaded PDF without indexing it. |
 | `POST` | `/documents/ingest` | Extract a PDF, create embeddings, and replace indexed chunks with the same filename. |
@@ -153,6 +154,7 @@ If a provider request fails, the page identifies OpenAI or Cohere and suggests c
 - `/ask` retrieves hybrid candidates, reranks them with Cohere, then generates an answer with citations.
 - The retrieval benchmark evaluates retrieval only; answer quality and citation correctness are not yet evaluated.
 - The Qdrant database is local and persistent in `qdrant_data/`.
+- The **Embedding map** page projects all stored chunk embeddings with 3D t-SNE and colors them using k-means on normalized original embeddings. Hover over a sphere for a preview, or select a sphere for full details; the selected sphere is highlighted in pink. Sphere selection requires a pointer; use the document explorer to inspect chunks without WebGL or a pointer. Cluster numbers are not topic labels; nearby points are only an approximate representation of similarity, and distances between groups are not reliable. Generate or regenerate the map after index changes. Large indexes can take substantial CPU time and memory, and leaving the page does not guarantee cancellation of server-side computation. A WebGL-capable browser is required for the plot.
 - The frontend supports PDF preview and indexing, indexed-document exploration, chat with source citations, and the bundled retrieval evaluation.
 - The answer response includes an answer and citations; a confidence score is not implemented.
 - This is a learning project, not a hardened production deployment. Authentication, authorization, deployment configuration, and operational monitoring are outside its current scope.

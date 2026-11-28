@@ -4,6 +4,7 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from openai import OpenAIError
 
 from app.document_processing import extract_pdf_data
+from app.embedding_map import build_embedding_map
 from app.embeddings import create_embeddings
 from app.generation import generate_answer
 from app.reranker import RerankerProviderError, rerank_sources
@@ -137,6 +138,11 @@ def list_documents():
             for filename, chunks in sorted(documents.items())
         ]
     }
+
+
+@app.get("/documents/map")
+def document_embedding_map():
+    return {"points": build_embedding_map()}
 
 
 @app.get("/documents/chunks")
