@@ -57,3 +57,22 @@ export async function getDocumentChunks(filename: string, signal: AbortSignal): 
   const result = await getDocuments<{ chunks: IndexedChunk[] }>(`/documents/chunks?${query}`, signal)
   return result.chunks
 }
+
+export async function deleteDocument(filename: string): Promise<void> {
+  const query = new URLSearchParams({ filename })
+  let response: Response
+  try {
+    response = await fetch(`/api/documents/delete?${query}`, { method: 'DELETE' })
+  } catch {
+    throw new Error('Could not reach the API. Make sure the backend is running.')
+  }
+  if (!response.ok) {
+    let detail: unknown
+    try {
+      detail = (await response.json()).detail
+    } catch {
+      throw new Error(`Could not remove document (${response.status}).`)
+    }
+    throw new Error(typeof detail === 'string' ? detail : `Could not remove document (${response.status}).`)
+  }
+}

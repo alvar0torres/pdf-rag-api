@@ -38,23 +38,29 @@
     overflow: hidden;
 }
 
+.documentRow {
+    display: flex;
+    align-items: stretch;
+    border-top: 1px solid #edf1ed;
+}
+
+.documentRow:first-child {
+    border-top: 0;
+}
+
 .document {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     padding: 16px 18px;
     border: 0;
-    border-top: 1px solid #edf1ed;
     background: white;
     color: #426d58;
     text-align: left;
     cursor: pointer;
-}
-
-.document:first-child {
-    border-top: 0;
 }
 
 .document:hover,
@@ -78,6 +84,28 @@
 .document small {
     color: #91a197;
     font-size: 11px;
+}
+
+.delete {
+    flex-shrink: 0;
+    align-self: center;
+    margin: 0 14px;
+    border: 1px solid #eeddd9;
+    border-radius: 7px;
+    background: white;
+    color: #9c5148;
+    padding: 8px 10px;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.delete:hover:not(:disabled) {
+    background: #fff1ef;
+}
+
+.delete:disabled {
+    opacity: .6;
+    cursor: not-allowed;
 }
 
 .detail {

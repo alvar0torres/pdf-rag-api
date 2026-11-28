@@ -36,7 +36,7 @@ it('opens a fresh explorer after indexing and navigates back to indexing', async
   expect(listDocuments).not.toHaveBeenCalled()
 
   fireEvent.click(screen.getByRole('link', { name: 'Explorer' }))
-  expect(await screen.findByRole('button', { name: /new.pdf/ })).toBeTruthy()
+  expect(await screen.findByRole('button', { name: /^new\.pdf/ })).toBeTruthy()
   expect(screen.queryByLabelText('Choose a PDF file')).toBeNull()
   expect(document.title).toBe('Document explorer | RAG Lab')
 

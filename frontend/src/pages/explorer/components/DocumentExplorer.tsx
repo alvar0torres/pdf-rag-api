@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getDocumentChunks, listDocuments } from '../../../api/documents'
+import { deleteDocument, getDocumentChunks, listDocuments } from '../../../api/documents'
 import type { IndexedChunk, IndexedDocument } from '../../../api/documents'
 import styles from './DocumentExplorer.module.css'
 
@@ -11,6 +11,8 @@ function DocumentExplorer() {
   const [selected, setSelected] = useState<string | null>(null)
   const [chunkResult, setChunkResult] = useState<ChunkResult | null>(null)
   const [refresh, setRefresh] = useState(0)
+  const [deleting, setDeleting] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState('')
   const listKey = String(refresh)
   const chunkKey = `${listKey}:${selected}`
   const loadingDocuments = listResult?.key !== listKey
@@ -52,21 +54,45 @@ function DocumentExplorer() {
     return () => controller.abort()
   }, [selected, chunkKey])
 
+  async function removeDocument(filename: string) {
+    if (deleting || !window.confirm(`Remove "${filename}" from the index? Its indexed chunks will be deleted.`)) return
+    setDeleteError('')
+    setDeleting(filename)
+    try {
+      await deleteDocument(filename)
+      setListResult((current) => current && {
+        ...current,
+        documents: current.documents.filter((document) => document.filename !== filename),
+      })
+      setSelected((current) => current === filename ? null : current)
+    } catch (error) {
+      setDeleteError(error instanceof Error ? error.message : 'Could not remove document.')
+    } finally {
+      setDeleting(null)
+    }
+  }
+
   return (
     <section className={styles.explorer} aria-labelledby="explorer-title">
       <h2 className={styles.heading} id="explorer-title">Indexed documents</h2>
       <p className={styles.description}>Explore stored text chunks. Original PDFs are not stored in the index.</p>
-      <button className={styles.refresh} type="button" onClick={() => setRefresh((value) => value + 1)} disabled={loadingDocuments}>Refresh</button>
+      <button className={styles.refresh} type="button" onClick={() => setRefresh((value) => value + 1)} disabled={loadingDocuments || deleting !== null}>Refresh</button>
       {loadingDocuments && <p className={styles.notice} role="status">Loading indexed documents…</p>}
       {listError && <p className={styles.error} role="alert">{listError}</p>}
+      {deleteError && <p className={styles.error} role="alert">{deleteError}</p>}
       {!loadingDocuments && !listError && documents.length === 0 && <p className={styles.notice}>No documents indexed yet.</p>}
       {!loadingDocuments && !listError && documents.length > 0 && (
         <div className={styles.list}>
           {documents.map((document) => (
-            <button type="button" key={document.filename} className={styles.document} aria-expanded={selected === document.filename} onClick={() => { setChunkResult(null); setSelected(selected === document.filename ? null : document.filename) }}>
-              <span><strong>{document.filename}</strong><small>{document.chunk_count} {document.chunk_count === 1 ? 'chunk' : 'chunks'} · {document.page_count} {document.page_count === 1 ? 'page with text' : 'pages with text'}</small></span>
-              <span aria-hidden="true">{selected === document.filename ? '−' : '+'}</span>
-            </button>
+            <div className={styles.documentRow} key={document.filename}>
+              <button type="button" className={styles.document} aria-expanded={selected === document.filename} onClick={() => { setChunkResult(null); setSelected(selected === document.filename ? null : document.filename) }}>
+                <span><strong>{document.filename}</strong><small>{document.chunk_count} {document.chunk_count === 1 ? 'chunk' : 'chunks'} · {document.page_count} {document.page_count === 1 ? 'page with text' : 'pages with text'}</small></span>
+                <span aria-hidden="true">{selected === document.filename ? '−' : '+'}</span>
+              </button>
+              <button type="button" className={styles.delete} aria-label={`Remove ${document.filename}`} disabled={deleting !== null} onClick={() => void removeDocument(document.filename)}>
+                {deleting === document.filename ? 'Removing…' : 'Remove'}
+              </button>
+            </div>
           ))}
         </div>
       )}
